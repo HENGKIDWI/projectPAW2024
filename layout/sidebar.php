@@ -17,6 +17,7 @@
                 echo '<a href="../../dashboard/admin/edit-profile.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-user-cog mr-2"></i>Edit Profil Admin</a>';
                 echo '<a href="../../dashboard/admin/buat_jadwal.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-calendar-plus mr-2"></i>Buat Jadwal</a>';
                 echo '<a href="../../dashboard/admin/aboutus.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-info-circle mr-2"></i>About Us</a>';
+                echo '<a href="../../dashboard/admin/admin_laporan.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-info-circle mr-2"></i>laporan kerusakan</a>';
             }
             // Jika role adalah guru
             elseif ($_SESSION['role'] == 'guru') {

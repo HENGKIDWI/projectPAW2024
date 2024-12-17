@@ -5,29 +5,21 @@ session_start();
 // Fungsi untuk mengambil laporan fasilitas
 function getLaporanFasilitas() {
     global $conn;
-    $query = "SELECT l.*, k.nama_kelas, k.tingkat 
-              FROM laporan_kerusakan AS l 
-              JOIN kelas AS k ON l.kelas_id = k.id_kelas 
-              ORDER BY tanggal_laporan DESC";
-    return mysqli_query($conn, $query);
-}
-
-// Fungsi untuk mendapatkan daftar kelas
-function getDaftarKelas() {
-    global $conn;
-    $query = "SELECT id_kelas, tingkat, nama_kelas FROM kelas";
+    $query = "SELECT l.*, f.nama AS nama_fasilitas 
+              FROM laporan_kerusakan AS l
+              JOIN fasilitas AS f ON l.fasilitas_id = f.id
+              ORDER BY l.tanggal_laporan DESC";
     return mysqli_query($conn, $query);
 }
 
 // Fungsi untuk mendapatkan daftar fasilitas
 function getDaftarFasilitas() {
     global $conn;
-    $query = "SELECT nama FROM fasilitas";
+    $query = "SELECT id, nama FROM fasilitas";
     return mysqli_query($conn, $query);
 }
 
-$nama_guru = $_SESSION['guru_id'];
-$daftar_kelas = getDaftarKelas();
+$nama_guru = $_SESSION['guru_id'] ?? 'Guest';
 $daftar_fasilitas = getDaftarFasilitas();
 ?>
 <!DOCTYPE html>
@@ -41,27 +33,28 @@ $daftar_fasilitas = getDaftarFasilitas();
 <body class="bg-gray-100 text-gray-800">
   <!-- Sidebar -->
   <?php include '../../layout/sidebar.php'; ?>
+  
   <!-- Navbar -->
-  <header id="header" class="bg-blue-600 text-white py-4 transition-all duration-300">
+  <header id="header" class="bg-blue-600 text-white py-4">
     <?php include '../../layout/header.php'; ?>
   </header>
 
   <!-- Main Content -->
-  <div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
+  <div id="mainContent" class="container mx-auto mt-8 px-4">
     <h2 class="text-2xl font-bold text-center mb-6">Laporan Kerusakan/Kekurangan Fasilitas</h2>
 
-    <!-- Layout Flex: Left side for table, right side for form -->
     <div class="flex space-x-8">
-      <!-- Tabel Laporan Fasilitas (Left Side) -->
+      <!-- Tabel Laporan -->
       <div class="w-2/3 bg-white shadow-md rounded-lg p-6">
-        <table class="table-auto w-full text-left border-collapse border border-gray-300">
+        <h3 class="text-lg font-semibold mb-4">Daftar Laporan</h3>
+        <table class="table-auto w-full border-collapse border border-gray-300">
           <thead>
             <tr>
-              <th class="px-4 py-2 border border-gray-300 bg-blue-100">NO</th>
-              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Kelas</th>
-              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Deskripsi</th>
-              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Tanggal</th>
-              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Status</th>
+              <th class="px-4 py-2 border bg-blue-100">NO</th>
+              <th class="px-4 py-2 border bg-blue-100">Fasilitas</th>
+              <th class="px-4 py-2 border bg-blue-100">Deskripsi</th>
+              <th class="px-4 py-2 border bg-blue-100">Tanggal</th>
+              <th class="px-4 py-2 border bg-blue-100">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -71,45 +64,32 @@ $daftar_fasilitas = getDaftarFasilitas();
                 $no = 1;
                 while ($row = mysqli_fetch_assoc($laporan)) {
                     echo "<tr>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tingkat'] . "-" . $row['nama_kelas'] . "</td>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['deskripsi'] . "</td>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_laporan'] . "</td>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['status'] . "</td>";
-                    echo "</td>";
+                    echo "<td class='px-4 py-2 border'>" . $no++ . "</td>";
+                    echo "<td class='px-4 py-2 border'>" . $row['nama_fasilitas'] . "</td>";
+                    echo "<td class='px-4 py-2 border'>" . $row['deskripsi'] . "</td>";
+                    echo "<td class='px-4 py-2 border'>" . $row['tanggal_laporan'] . "</td>";
+                    echo "<td class='px-4 py-2 border'>" . $row['status'] . "</td>";
                     echo "</tr>";
                 }
             } else {
-                echo "<tr><td colspan='6' class='px-4 py-2 text-center text-gray-500'>Belum ada laporan yang tersedia.</td></tr>";
+                echo "<tr><td colspan='5' class='text-center text-gray-500 py-4'>Belum ada laporan tersedia.</td></tr>";
             }
             ?>
           </tbody>
         </table>
       </div>
 
-      <!-- Form Laporan Fasilitas (Right Side) -->
+      <!-- Form Laporan -->
       <div class="w-1/3 bg-white shadow-md rounded-lg p-6">
-        <h3 class="text-xl font-semibold mb-4">Form Laporan</h3>
+        <h3 class="text-lg font-semibold mb-4">Form Laporan</h3>
         <form action="simpan_laporan.php" method="POST">
-          <!-- Dropdown Kelas -->
-          <div class="mb-4">
-            <label for="kelas" class="block text-sm font-semibold mb-2">Kelas</label>
-            <select id="kelas" name="kelas" class="w-full p-2 border border-gray-300 rounded" required>
-              <option value="" disabled selected>-- Pilih Kelas --</option>
-              <?php while ($kelas = mysqli_fetch_assoc($daftar_kelas)): ?>
-                <option value="<?php echo $kelas['id_kelas']; ?>">
-                  <?php echo $kelas['tingkat'] . "-" . $kelas['nama_kelas']; ?>
-                </option>
-              <?php endwhile; ?>
-            </select>
-          </div>
           <!-- Dropdown Fasilitas -->
           <div class="mb-4">
             <label for="fasilitas" class="block text-sm font-semibold mb-2">Fasilitas</label>
-            <select id="fasilitas" name="fasilitas" class="w-full p-2 border border-gray-300 rounded" required>
+            <select id="fasilitas" name="fasilitas_id" class="w-full p-2 border rounded" required>
               <option value="" disabled selected>-- Pilih Fasilitas --</option>
               <?php while ($fasilitas = mysqli_fetch_assoc($daftar_fasilitas)): ?>
-                <option value="<?php echo $fasilitas['nama']; ?>">
+                <option value="<?php echo $fasilitas['id']; ?>">
                   <?php echo $fasilitas['nama']; ?>
                 </option>
               <?php endwhile; ?>
@@ -118,14 +98,15 @@ $daftar_fasilitas = getDaftarFasilitas();
           <!-- Deskripsi -->
           <div class="mb-4">
             <label for="deskripsi" class="block text-sm font-semibold mb-2">Deskripsi</label>
-            <textarea id="deskripsi" name="deskripsi" rows="4" class="w-full p-2 border border-gray-300 rounded" required></textarea>
+            <textarea id="deskripsi" name="deskripsi" rows="4" class="w-full p-2 border rounded" required></textarea>
           </div>
           <!-- Submit -->
-          <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700">Kirim Laporan</button>
+          <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Kirim Laporan</button>
         </form>
       </div>
     </div>
   </div>
-  <?php require_once "../../layout/footer.php"; ?>
+
+  <?php include "../../layout/footer.php"; ?>
 </body>
 </html>
