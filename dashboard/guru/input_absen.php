@@ -56,13 +56,32 @@ function getRiwayatAbsensi($guru_id)
 {
   global $conn;
   $guru_id = mysqli_real_escape_string($conn, $guru_id);
-  $query = "SELECT DISTINCT a.*, k.tingkat, k.nama_kelas, mp.nama_pelajaran 
-              FROM absensi a
-              JOIN kelas k ON a.kelas_id = k.id_kelas
-              JOIN jadwal j ON k.id_kelas = j.kelas_id
-              JOIN mata_pelajaran mp ON a.id_mata_pelajaran = mp.id_mata_pelajaran
-              WHERE j.guru_id = '$guru_id'
-              ORDER BY a.tanggal DESC";
+  // $query = "SELECT DISTINCT SUM(a.tanggal) as jumlah,a.*, k.tingkat, k.nama_kelas, mp.nama_pelajaran 
+  //             FROM absensi a
+  //             JOIN kelas k ON a.kelas_id = k.id_kelas
+  //             JOIN jadwal j ON k.id_kelas = j.kelas_id
+  //             JOIN mata_pelajaran mp ON a.id_mata_pelajaran = mp.id_mata_pelajaran
+  //             WHERE j.guru_id = '$guru_id'
+  //             ORDER BY a.tanggal DESC
+  //             GROUP BY jumlah";
+  $query = "SELECT 
+    DISTINCT a.tanggal, 
+    k.tingkat, 
+    k.nama_kelas, 
+    mp.nama_pelajaran
+FROM 
+    absensi a
+JOIN 
+    kelas k ON a.kelas_id = k.id_kelas
+JOIN 
+    jadwal j ON k.id_kelas = j.kelas_id
+JOIN 
+    mata_pelajaran mp ON a.id_mata_pelajaran = mp.id_mata_pelajaran
+WHERE 
+    j.guru_id = '$guru_id'
+ORDER BY 
+    a.tanggal DESC;
+";
   $result = mysqli_query($conn, $query);
 
   return $result ? $result : handleDatabaseError($conn, $query);
@@ -73,68 +92,68 @@ function getRiwayatAbsensi($guru_id)
 // Main attendance submission handling
 if (isset($_POST["simpan_absensi"])) {
 
-  if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Ambil data yang dikirim dari form
-    $kelas = $_POST['kelas']; // Kelas yang dipilih
-    $mata_pelajaran = $_POST['mata_pelajaran']; // Mata pelajaran yang dipilih
-    $tanggal = $_POST['tanggal']; // Tanggal absensi
-    $absensi = $_POST['absensi']; // Array absensi (NISN => status)
+  // Ambil data yang dikirim dari form
+  $kelas = $_POST['kelas']; // Kelas yang dipilih
+  $mata_pelajaran = $_POST['mata_pelajaran']; // Mata pelajaran yang dipilih
+  $tanggal = $_POST['tanggal']; // Tanggal absensi
+  $absensi = $_POST['absensi']; // Array absensi (NISN => status)
 
-    // Pastikan sesi guru_id tersedia
-    if (!isset($_SESSION['guru_id'])) {
-      die("Error: ID Guru tidak tersedia. Silakan login ulang.");
-    }
+  // Pastikan sesi guru_id tersedia
+  if (!isset($_SESSION['guru_id'])) {
+    die("Error: ID Guru tidak tersedia. Silakan login ulang.");
+  }
 
-    $guru_id = $_SESSION['guru_id'];
+  $guru_id = $_SESSION['guru_id'];
 
-    // Ambil id_mata_pelajaran berdasarkan nama_pelajaran
-    global $conn; // Asumsikan koneksi database sudah dibuat
-    $mapel_safe = mysqli_real_escape_string($conn, $mata_pelajaran);
-    $query_mapel = "SELECT id_mata_pelajaran FROM mata_pelajaran WHERE nama_pelajaran = '$mapel_safe'";
-    $result_mapel = mysqli_query($conn, $query_mapel);
+  // Ambil id_mata_pelajaran berdasarkan nama_pelajaran
+  global $conn; // Asumsikan koneksi database sudah dibuat
+  $mapel_safe = mysqli_real_escape_string($conn, $mata_pelajaran);
+  $query_mapel = "SELECT id_mata_pelajaran FROM mata_pelajaran WHERE nama_pelajaran = '$mapel_safe'";
+  $result_mapel = mysqli_query($conn, $query_mapel);
 
-    if ($result_mapel && mysqli_num_rows($result_mapel) > 0) {
-      $row_mapel = mysqli_fetch_assoc($result_mapel);
-      $id_mata_pelajaran = $row_mapel['id_mata_pelajaran'];
-    } else {
-      die("Mata pelajaran tidak ditemukan di database.");
-    }
+  if ($result_mapel && mysqli_num_rows($result_mapel) > 0) {
+    $row_mapel = mysqli_fetch_assoc($result_mapel);
+    $id_mata_pelajaran = $row_mapel['id_mata_pelajaran'];
+  } else {
+    die("Mata pelajaran tidak ditemukan di database.");
+  }
 
-    // Looping data absensi
-    foreach ($absensi as $nis => $status) {
-      // echo "<tr>";
-      // echo "<td>" . htmlspecialchars($nis) . "</td>";
-      // echo "<td>" . htmlspecialchars($status) . "</td>";
-      // echo "</tr>";
+  // Looping data absensi
+  foreach ($absensi as $nis => $status) {
+    // echo "<tr>";
+    // echo "<td>" . htmlspecialchars($nis) . "</td>";
+    // echo "<td>" . htmlspecialchars($status) . "</td>";
+    // echo "</tr>";
 
-      // Ambil id_siswa berdasarkan nis
-      $nis_safe = mysqli_real_escape_string($conn, $nis);
-      $query_siswa = "SELECT id_siswa FROM siswa WHERE nis = '$nis_safe'";
-      $result_siswa = mysqli_query($conn, $query_siswa);
+    // Ambil id_siswa berdasarkan nis
+    $nis_safe = mysqli_real_escape_string($conn, $nis);
+    $query_siswa = "SELECT id_siswa FROM siswa WHERE nis = '$nis_safe'";
+    $result_siswa = mysqli_query($conn, $query_siswa);
 
-      if ($result_siswa && mysqli_num_rows($result_siswa) > 0) {
-        $row_siswa = mysqli_fetch_assoc($result_siswa);
-        $id_siswa = $row_siswa['id_siswa'];
+    if ($result_siswa && mysqli_num_rows($result_siswa) > 0) {
+      $row_siswa = mysqli_fetch_assoc($result_siswa);
+      $id_siswa = $row_siswa['id_siswa'];
 
-        // Insert ke tabel absensi
-        $kelas_safe = mysqli_real_escape_string($conn, $kelas);
-        $tanggal_safe = mysqli_real_escape_string($conn, $tanggal);
-        $status_safe = mysqli_real_escape_string($conn, $status);
+      // Insert ke tabel absensi
+      $kelas_safe = mysqli_real_escape_string($conn, $kelas);
+      $tanggal_safe = mysqli_real_escape_string($conn, $tanggal);
+      $status_safe = mysqli_real_escape_string($conn, $status);
 
-        $query_insert = "INSERT INTO absensi (kelas_id, id_mata_pelajaran, guru_id, tanggal, id_siswa, status_absensi)
+      $query_insert = "INSERT INTO absensi (kelas_id, id_mata_pelajaran, guru_id, tanggal, id_siswa, status_absensi)
                                VALUES ('$kelas_safe', '$id_mata_pelajaran', '$guru_id', '$tanggal_safe', '$id_siswa', '$status_safe')";
 
-        if (!mysqli_query($conn, $query_insert)) {
-          echo "Error: " . mysqli_error($conn);
-        }
-      } else {
-        echo "<script>alert('NIS $nis tidak ditemukan di database siswa!');</script>";
+      if (!mysqli_query($conn, $query_insert)) {
+        echo "Error: " . mysqli_error($conn);
       }
+    } else {
+      echo "<script>alert('NIS $nis tidak ditemukan di database siswa!');</script>";
     }
-
-    // echo "</table>";
-    echo "<script>alert('Data absensi berhasil disimpan!');</script>";
   }
+
+  // echo "</table>";
+  echo "<script>alert('Data absensi berhasil disimpan!');</script>";
+  header("Location: input_absen.php");
+  exit();
 }
 
 // Ambil ID guru dari sesi
@@ -280,7 +299,7 @@ $selected_tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d')
         <tbody>
           <?php
           $riwayat_absensi = getRiwayatAbsensi($guru_id);
-          if (mysqli_num_rows($riwayat_absensi) > 0 && mysqli_num_rows($riwayat_absensi)== $_POST['tanggal']) {
+          if (mysqli_num_rows($riwayat_absensi) > 0) {
             $no = 1;
             while ($row = mysqli_fetch_assoc($riwayat_absensi)) {
               echo "<tr>";
@@ -289,7 +308,7 @@ $selected_tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d')
               echo "<td class='py-2 px-4 border text-center'>" . $row['tingkat'] . " " . $row['nama_kelas'] . "</td>";
               echo "<td class='py-2 px-4 border text-center'>" . $row['tanggal'] . "</td>";
               echo "<td class='py-2 px-4 border text-center'>";
-              echo "<a href='detail_absensi.php?kelas=" . $row['kelas_id'] . "&mapel=" . urlencode($row['nama_pelajaran']) . "&tanggal=" . $row['tanggal'] . "' 
+              echo "<a href='detail_absensi.php?kelas=" . $row['tingkat'] . "&mapel=" . urlencode($row['nama_pelajaran']) . "&tanggal=" . $row['tanggal'] . "' 
                           class='bg-blue-500 text-white py-1 px-3 rounded-md text-sm hover:bg-blue-400'>Detail</a>";
               echo "</td>";
               echo "</tr>";
