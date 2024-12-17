@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Proses upload file tugas (opsional)
     $file_tugas = null;
     if (!empty($_FILES['file_tugas']['name'])) {
-        $target_dir = "uploads/";
+        $target_dir = "uploads/tugas/";
         if (!is_dir($target_dir)) {
             mkdir($target_dir, 0777, true);
         }
@@ -47,8 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         url_tugas, 
         poin, 
         kelas_id, 
-        deadline, 
-        created_at
+        deadline
     ) VALUES (
         '$judul', 
         '$deskripsi', 
@@ -56,12 +55,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         " . ($url_tugas ? "'$url_tugas'" : "NULL") . ", 
         $poin, 
         '$kelas_id', 
-        '$deadline', 
-        NOW()
+        '$deadline'
     )";
     
     if (mysqli_query($conn, $query)) {
         $success_message = "Tugas berhasil ditambahkan!";
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    
     } else {
         $error_message = "Error: " . mysqli_error($conn);
     }

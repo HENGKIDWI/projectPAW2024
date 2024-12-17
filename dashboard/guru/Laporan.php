@@ -5,11 +5,30 @@ session_start();
 // Fungsi untuk mengambil laporan fasilitas
 function getLaporanFasilitas() {
     global $conn;
-    $query = "SELECT l.*, k.nama_kelas, k.tingkat FROM laporan_kerusakan AS l JOIN kelas AS k WHERE l.kelas_id = k.id_kelas ORDER BY tanggal_laporan DESC";
+    $query = "SELECT l.*, k.nama_kelas, k.tingkat 
+              FROM laporan_kerusakan AS l 
+              JOIN kelas AS k ON l.kelas_id = k.id_kelas 
+              ORDER BY tanggal_laporan DESC";
+    return mysqli_query($conn, $query);
+}
+
+// Fungsi untuk mendapatkan daftar kelas
+function getDaftarKelas() {
+    global $conn;
+    $query = "SELECT id_kelas, tingkat, nama_kelas FROM kelas";
+    return mysqli_query($conn, $query);
+}
+
+// Fungsi untuk mendapatkan daftar fasilitas
+function getDaftarFasilitas() {
+    global $conn;
+    $query = "SELECT nama FROM fasilitas";
     return mysqli_query($conn, $query);
 }
 
 $nama_guru = $_SESSION['guru_id'];
+$daftar_kelas = getDaftarKelas();
+$daftar_fasilitas = getDaftarFasilitas();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,28 +91,41 @@ $nama_guru = $_SESSION['guru_id'];
       <div class="w-1/3 bg-white shadow-md rounded-lg p-6">
         <h3 class="text-xl font-semibold mb-4">Form Laporan</h3>
         <form action="simpan_laporan.php" method="POST">
+          <!-- Dropdown Kelas -->
           <div class="mb-4">
             <label for="kelas" class="block text-sm font-semibold mb-2">Kelas</label>
-            <input type="text" id="kelas" name="kelas" class="w-full p-2 border border-gray-300 rounded" required>
-          </div>
-          <div class="mb-4">
-            <label for="jenis" class="block text-sm font-semibold mb-2">Jenis</label>
-            <select id="jenis" name="jenis" class="w-full p-2 border border-gray-300 rounded" required>
-              <option value="kerusakan">Kerusakan</option>
-              <option value="kekurangan">Kekurangan</option>
+            <select id="kelas" name="kelas" class="w-full p-2 border border-gray-300 rounded" required>
+              <option value="" disabled selected>-- Pilih Kelas --</option>
+              <?php while ($kelas = mysqli_fetch_assoc($daftar_kelas)): ?>
+                <option value="<?php echo $kelas['id_kelas']; ?>">
+                  <?php echo $kelas['tingkat'] . "-" . $kelas['nama_kelas']; ?>
+                </option>
+              <?php endwhile; ?>
             </select>
           </div>
+          <!-- Dropdown Fasilitas -->
+          <div class="mb-4">
+            <label for="fasilitas" class="block text-sm font-semibold mb-2">Fasilitas</label>
+            <select id="fasilitas" name="fasilitas" class="w-full p-2 border border-gray-300 rounded" required>
+              <option value="" disabled selected>-- Pilih Fasilitas --</option>
+              <?php while ($fasilitas = mysqli_fetch_assoc($daftar_fasilitas)): ?>
+                <option value="<?php echo $fasilitas['nama']; ?>">
+                  <?php echo $fasilitas['nama']; ?>
+                </option>
+              <?php endwhile; ?>
+            </select>
+          </div>
+          <!-- Deskripsi -->
           <div class="mb-4">
             <label for="deskripsi" class="block text-sm font-semibold mb-2">Deskripsi</label>
             <textarea id="deskripsi" name="deskripsi" rows="4" class="w-full p-2 border border-gray-300 rounded" required></textarea>
           </div>
+          <!-- Submit -->
           <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700">Kirim Laporan</button>
         </form>
       </div>
     </div>
   </div>
-  <?php
-    require_once "../../layout/footer.php"
-  ?>
+  <?php require_once "../../layout/footer.php"; ?>
 </body>
 </html>
