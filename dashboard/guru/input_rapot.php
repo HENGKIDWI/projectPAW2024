@@ -75,11 +75,12 @@ $result_mapel = mysqli_query($conn, $query_mapel);
                     <?php while ($mapel = mysqli_fetch_assoc($result_mapel)): ?>
                         <div class="mb-2">
                             <label class="block font-medium"><?php echo $mapel['nama_pelajaran']; ?></label>
-                            <div class="grid grid-cols-3 gap-2">
+                            <div class="grid grid-cols-4 gap-2">
                                 <input type="hidden" name="id_mapel[]" value="<?php echo $mapel['id_mata_pelajaran']; ?>">
                                 <input type="number" name="nilai_pengetahuan[]" class="px-3 py-2 border rounded-md" placeholder="Nilai Pengetahuan" min="0" max="100" required>
+                                <input type="text" name="predikat_pengetahuan[]" class="px-3 py-2 border rounded-md" placeholder="Predikat (A/B/C/D)" required>
                                 <input type="number" name="nilai_keterampilan[]" class="px-3 py-2 border rounded-md" placeholder="Nilai Keterampilan" min="0" max="100" required>
-                                <input type="text" name="predikat[]" class="px-3 py-2 border rounded-md" placeholder="Predikat (A/B/C/D)" required>
+                                <input type="text" name="predikat_keterampilan[]" class="px-3 py-2 border rounded-md" placeholder="Predikat (A/B/C/D)" required>
                             </div>
                         </div>
                     <?php endwhile; ?>

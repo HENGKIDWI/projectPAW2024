@@ -65,8 +65,8 @@ function getRiwayatPelanggaran()
   global $conn;
   $query = "SELECT 
             s.nama_lengkap AS nama_siswa,
-            k.nama_kelas,
-            IFNULL(g.nama_lengkap, 'Tidak Ada Guru Wali') AS nama_guru_wali, -- Perbaikan di sini
+            CONCAT(k.tingkat, ' ', k.nama_kelas) AS nama_kelas, -- Menambahkan tingkat
+            IFNULL(g.nama_lengkap, 'Tidak Ada Guru Wali') AS nama_guru_wali,
             p.poin AS poin_terbaru,
             p.tanggal_pelanggaran,
             (
@@ -77,9 +77,9 @@ function getRiwayatPelanggaran()
         FROM pelanggaran p
         JOIN siswa s ON p.siswa_id = s.id_siswa
         JOIN kelas k ON p.id_kelas = k.id_kelas
-        LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru -- LEFT JOIN guru
-        ORDER BY p.tanggal_pelanggaran DESC;
-      ";
+        LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru
+        ORDER BY p.tanggal_pelanggaran DESC";
+        
   $result = mysqli_query($conn, $query);
 
   if (!$result) {
@@ -88,6 +88,7 @@ function getRiwayatPelanggaran()
 
   return $result;
 }
+
 
 
 // Proses penyimpanan pelanggaran
