@@ -10,7 +10,7 @@ if (!isset($_SESSION['nama_lengkap'])) {
 // Ambil data kelas dan wali kelas
 $query_kelas = "SELECT k.id_kelas, k.nama_kelas, k.tingkat, g.nama_lengkap AS wali_kelas
                 FROM kelas k
-                LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru";
+                LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru ORDER BY k.tingkat, k.nama_kelas";
 $result_kelas = mysqli_query($conn, $query_kelas);
 ?>
 

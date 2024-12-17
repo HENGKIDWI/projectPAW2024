@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               VALUES ('$nip', '$nama_lengkap', '$email', '$no_telp', '$mata_pelajaran_id', '$username', '$password')";
     mysqli_query($conn, $query);
 
-    header("Location: tampilan.php");
+    header("Location: tampilanGuru.php");
     exit;
 }
 ?>
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <main class="flex-1 container mx-auto px-6 mt-8 pb-12">
       <h1 class="text-3xl font-bold mb-6">Tambah Guru</h1>
 
-      <form action="" method="POST" class="space-y-4 bg-white p-6 rounded shadow-md bg-gray-300">
+      <form autocomplete="off" action="" method="POST" class="space-y-4 bg-white p-6 rounded shadow-md bg-gray-300">
         <div>
           <label for="nip" class="block font-semibold">NIP</label>
           <input type="text" id="nip" name="nip" class="w-full border rounded px-3 py-2" required>

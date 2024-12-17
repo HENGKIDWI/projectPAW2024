@@ -151,7 +151,7 @@ $count = 1;
                       <option value="null">Bukan Wali Kelas</option> <!-- Opsi baru untuk "Bukan Wali Kelas" -->
                       <?php
                       // Query untuk mendapatkan daftar kelas
-                      $kelasQuery = "SELECT id_kelas, CONCAT(tingkat, ' ', nama_kelas) AS nama_kelas FROM kelas";
+                      $kelasQuery = "SELECT id_kelas, CONCAT(tingkat, ' ', nama_kelas) AS nama_kelas FROM kelas ORDER BY tingkat, nama_kelas";
                       $kelasResult = mysqli_query($conn, $kelasQuery);
                       while ($kelas = mysqli_fetch_assoc($kelasResult)) :
                       ?>
