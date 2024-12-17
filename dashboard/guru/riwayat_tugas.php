@@ -72,6 +72,7 @@ function getRiwayatTugas() {
     $query = "SELECT * FROM tugas as tg
     CROSS JOIN mata_pelajaran as mp 
     CROSS JOIN kelas as kls
+    CROSS JOIN pengumpulan_tugas
     WHERE tg.mata_pelajaran_id = mp.id_mata_pelajaran 
     AND tg.kelas_id=kls.id_kelas";
     return mysqli_query($conn, $query);

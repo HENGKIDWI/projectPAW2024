@@ -2,31 +2,30 @@
 include "../../koneksi.php";
 session_start();
 
-// Fungsi untuk mengambil daftar kelas
+
+// Function to get list of classes
 function getDaftarKelas() {
     global $conn;
-    $query = "SELECT * FROM kelas";
+    $query = "SELECT DISTINCT tingkat FROM kelas ORDER BY tingkat ASC" ;
     return mysqli_query($conn, $query);
 }
 
-// Fungsi untuk mengambil daftar mata pelajaran
+// Function to get list of subjects
 function getDaftarMapel() {
     global $conn;
     $query = "SELECT * FROM mata_pelajaran";
     return mysqli_query($conn, $query);
 }
 
-// Proses form jika disubmit
+// Process form if submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Validasi input
+    // Validate input
     $judul = mysqli_real_escape_string($conn, $_POST['judul']);
     $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi']);
-    $poin = intval($_POST['poin']);
     $kelas_id = mysqli_real_escape_string($conn, $_POST['kelas']);
     $mapel_id = mysqli_real_escape_string($conn, $_POST['mata_pelajaran']);
-    $deadline = mysqli_real_escape_string($conn, $_POST['deadline']);
     
-    // Proses upload file soal (opsional)
+    // Process file upload for question (optional)
     $file_soal = null;
     if (!empty($_FILES['file_soal']['name'])) {
         $target_dir = "uploads/soal/";
@@ -44,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     
-    // Proses upload file jawaban (opsional)
+    // Process file upload for answer (optional)
     $file_jawaban = null;
     if (!empty($_FILES['file_jawaban']['name'])) {
         $target_dir = "uploads/jawaban/";
@@ -62,41 +61,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     
-    // URL soal (opsional)
+    // Question URL (optional)
     $url_soal = !empty($_POST['url_soal']) ? mysqli_real_escape_string($conn, $_POST['url_soal']) : null;
     
-    // URL jawaban (opsional)
+    // Answer URL (optional)
     $url_jawaban = !empty($_POST['url_jawaban']) ? mysqli_real_escape_string($conn, $_POST['url_jawaban']) : null;
     
-    // Query insert tugas
-    $query = "INSERT INTO tugas (
-        judul, 
-        deskripsi, 
+    // Insert query for task
+    $query = "INSERT INTO bank_soal (
+        judul_bank_soal, 
+        detail_bank_soal, 
+        mata_pelajaran,
+        kelas, 
         file_soal, 
-        url_soal, 
         file_jawaban,
-        url_jawaban,
-        poin, 
-        kelas_id, 
-        mapel_id,
-        deadline, 
-        created_at
+        url_soal, 
+        url_jawaban
     ) VALUES (
         '$judul', 
         '$deskripsi', 
-        " . ($file_soal ? "'$file_soal'" : "NULL") . ", 
-        " . ($url_soal ? "'$url_soal'" : "NULL") . ", 
-        " . ($file_jawaban ? "'$file_jawaban'" : "NULL") . ", 
-        " . ($url_jawaban ? "'$url_jawaban'" : "NULL") . ", 
-        $poin, 
-        '$kelas_id', 
         '$mapel_id',
-        '$deadline', 
-        NOW()
+        '$kelas_id', 
+        " . ($file_soal ? "'$file_soal'" : "NULL") . ", 
+        " . ($file_jawaban ? "'$file_jawaban'" : "NULL") . ", 
+        " . ($url_soal ? "'$url_soal'" : "NULL") . ", 
+        " . ($url_jawaban ? "'$url_jawaban'" : "NULL") . "
     )";
     
     if (mysqli_query($conn, $query)) {
         $success_message = "Tugas berhasil ditambahkan!";
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();    
     } else {
         $error_message = "Error: " . mysqli_error($conn);
     }
@@ -107,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Tugas Guru</title>
+    <title>Input Bank Soal</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -124,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2 class="text-2xl font-bold text-center mb-6">Input Bank Soal</h2>
 
         <?php 
-        // Tampilkan pesan sukses atau error
+        // Display success or error message
         if (isset($success_message)) {
             echo "<div class='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4' role='alert'>$success_message</div>";
         }
@@ -136,104 +131,104 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl mx-auto">
             <form action="" method="POST" enctype="multipart/form-data">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Kolom Kiri: Informasi Dasar Tugas -->
+                    <!-- Left Column: Basic Task Information -->
                     <div class="space-y-4">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">Informasi Bank Soal</h3>
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">Bank Soal Information</h3>
                         
-                        <!-- Judul Tugas -->
+                        <!-- Task Title -->
                         <div>
-                            <label for="judul" class="block text-gray-700 font-bold mb-2">Judul Bank Soal</label>
+                            <label for="judul" class="block text-gray-700 font-bold mb-2">Task Title</label>
                             <input type="text" id="judul" name="judul" required 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Masukkan judul tugas">
+                                placeholder="Enter task title">
                         </div>
 
-                        <!-- Deskripsi Tugas -->
+                        <!-- Task Description -->
                         <div>
-                            <label for="deskripsi" class="block text-gray-700 font-bold mb-2">Deskripsi Bank Soal</label>
+                            <label for="deskripsi" class="block text-gray-700 font-bold mb-2">Task Description</label>
                             <textarea id="deskripsi" name="deskripsi" rows="4" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Jelaskan detail tugas"></textarea>
+                                placeholder="Explain task details"></textarea>
                         </div>
 
-                        <!-- Mata Pelajaran -->
+                        <!-- Subject -->
                         <div>
-                            <label for="mata_pelajaran" class="block text-gray-700 font-bold mb-2">Pilih Mata Pelajaran</label>
+                            <label for="mata_pelajaran" class="block text-gray-700 font-bold mb-2">Select Subject</label>
                             <select id="mata_pelajaran" name="mata_pelajaran" required 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Pilih Mata Pelajaran</option>
+                                <option value="">Select Subject</option>
                                 <?php 
                                 $mapel_list = getDaftarMapel();
                                 while ($row = mysqli_fetch_assoc($mapel_list)) {
-                                    echo "<option value='" . $row['id_mapel'] . "'>" . $row['nama_mapel'] . "</option>";
+                                    echo "<option value='" . $row['nama_pelajaran'] . "'>" . $row['nama_pelajaran'] . "</option>";
                                 }
                                 ?>
                             </select>
                         </div>
 
-                        <!-- Kelas -->
+                        <!-- Class -->
                         <div>
-                            <label for="kelas" class="block text-gray-700 font-bold mb-2">Pilih Kelas</label>
+                            <label for="kelas" class="block text-gray-700 font-bold mb-2">Select Class</label>
                             <select id="kelas" name="kelas" required 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Pilih Kelas</option>
+                                <option value="">Select Class</option>
                                 <?php 
                                 $kelas_list = getDaftarKelas();
                                 while ($row = mysqli_fetch_assoc($kelas_list)) {
-                                    echo "<option value='" . $row['id_kelas'] . "'>" . $row['id_kelas'] . "</option>";
+                                    echo "<option value='" . $row['tingkat'] . "'>" . $row['tingkat'] ."</option>";
                                 }
                                 ?>
                             </select>
                         </div>
 
-                        <!-- Poin Tugas -->
+                        <!-- Task Points -->
                         <!-- <div>
-                            <label for="poin" class="block text-gray-700 font-bold mb-2">Poin Tugas</label>
+                            <label for="poin" class="block text-gray-700 font-bold mb-2">Task Points</label>
                             <input type="number" id="poin" name="poin" required min="0" max="100"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Masukkan poin tugas">
+                                placeholder="Enter task points">
                         </div> -->
 
                         <!-- Deadline -->
                         <!-- <div>
-                            <label for="deadline" class="block text-gray-700 font-bold mb-2">Deadline Tugas</label>
+                            <label for="deadline" class="block text-gray-700 font-bold mb-2">Task Deadline</label>
                             <input type="datetime-local" id="deadline" name="deadline" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div> -->
                     </div>
 
-                    <!-- Kolom Kanan: Upload File dan URL -->
+                    <!-- Right Column: File and URL Upload -->
                     <div class="space-y-4">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">Dokumen</h3>
+                        <h3 class="text-xl font-semibold text-blue-600 mb-4">Documents</h3>
                         
-                        <!-- File Soal (Opsional) -->
+                        <!-- Question File (Optional) -->
                         <div>
-                            <label for="file_soal" class="block text-gray-700 font-bold mb-2">File Soal (Opsional)</label>
+                            <label for="file_soal" class="block text-gray-700 font-bold mb-2">Question File (Optional)</label>
                             <input type="file" id="file_soal" name="file_soal" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
-                        <!-- URL Soal (Opsional) -->
+                        <!-- Question URL (Optional) -->
                         <div>
-                            <label for="url_soal" class="block text-gray-700 font-bold mb-2">URL Soal (Opsional)</label>
+                            <label for="url_soal" class="block text-gray-700 font-bold mb-2">Question URL (Optional)</label>
                             <input type="url" id="url_soal" name="url_soal" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="https://example.com/soal">
+                                placeholder="https://example.com/question">
                         </div>
 
-                        <!-- File Jawaban (Opsional) -->
+                        <!-- Answer File (Optional) -->
                         <div>
-                            <label for="file_jawaban" class="block text-gray-700 font-bold mb-2">File Jawaban (Opsional)</label>
+                            <label for="file_jawaban" class="block text-gray-700 font-bold mb-2">Answer File (Optional)</label>
                             <input type="file" id="file_jawaban" name="file_jawaban" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
-                        <!-- URL Jawaban (Opsional) -->
+                        <!-- Answer URL (Optional) -->
                         <div>
-                            <label for="url_jawaban" class="block text-gray-700 font-bold mb-2">URL Jawaban (Opsional)</label>
+                            <label for="url_jawaban" class="block text-gray-700 font-bold mb-2">Answer URL (Optional)</label>
                             <input type="url" id="url_jawaban" name="url_jawaban" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="https://example.com/jawaban">
+                                placeholder="https://example.com/answer">
                         </div>
                     </div>
                 </div>
@@ -242,7 +237,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="text-right mt-6">
                     <button type="submit" 
                         class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-300">
-                        Simpan
+                        Save
                     </button>
                 </div>
             </form>

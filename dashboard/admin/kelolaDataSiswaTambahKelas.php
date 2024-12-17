@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Jalankan query
     if (mysqli_query($conn, $query)) {
         // Jika sukses, redirect ke halaman kelas atau halaman sebelumnya
-        header("Location: kelolaDataKelas.php?success=1");
+        header("Location: kelolaDataSiswa.php?success=1");
     } else {
         // Jika gagal, tampilkan error
         echo "Error: " . mysqli_error($conn);

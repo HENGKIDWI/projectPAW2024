@@ -65,25 +65,6 @@ $jadwalMengajar = getJadwalMengajarHariIni($nama_guru);
       <h3 class="text-lg font-semibold">Pengumuman Terbaru</h3>
       <p class="text-gray-600 mt-4"><?php echo getPengumumanTerbaru(); ?></p>
     </div>
-
-    <!-- Card untuk informasi tambahan -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-
-      <!-- Jadwal Mengajar Hari Ini -->
-      <div class="bg-white shadow-md rounded-lg p-6">
-        <h3 class="text-lg font-semibold">Jadwal Mengajar Hari Ini</h3>
-        <ul class="text-gray-600 mt-4">
-          <?php if (!empty($jadwalMengajar)) : ?>
-            <?php foreach ($jadwalMengajar as $jadwal) : ?>
-              <li><?php echo "Pukul " . $jadwal['jam_mulai'] . " - " . $jadwal['jam_mulai'] . "/". $jadwal['mata_pelajaran'] . " (" . $jadwal['kelas'] . ")"; ?></li>
-            <?php endforeach; ?>
-          <?php else : ?>
-            <li>Tidak ada jadwal mengajar hari ini.</li>
-          <?php endif; ?>
-        </ul>
-      </div>
-
-    </div>
   </div>
 
 

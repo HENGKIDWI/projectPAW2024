@@ -5,7 +5,7 @@ session_start();
 // Fungsi untuk mengambil laporan fasilitas
 function getLaporanFasilitas() {
     global $conn;
-    $query = "SELECT * FROM laporan_kerusakan ORDER BY tanggal_laporan DESC";
+    $query = "SELECT l.*, k.nama_kelas, k.tingkat FROM laporan_kerusakan AS l JOIN kelas AS k WHERE l.kelas_id = k.id_kelas ORDER BY tanggal_laporan DESC";
     return mysqli_query($conn, $query);
 }
 
@@ -40,10 +40,9 @@ $nama_guru = $_SESSION['guru_id'];
             <tr>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">NO</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Kelas</th>
-              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Jenis</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Deskripsi</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Tanggal</th>
-              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Aksi</th>
+              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -54,13 +53,10 @@ $nama_guru = $_SESSION['guru_id'];
                 while ($row = mysqli_fetch_assoc($laporan)) {
                     echo "<tr>";
                     echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['kelas'] . "</td>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['jenis'] . "</td>";
+                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tingkat'] . "-" . $row['nama_kelas'] . "</td>";
                     echo "<td class='px-4 py-2 border border-gray-300'>" . $row['deskripsi'] . "</td>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal'] . "</td>";
-                    echo "<td class='px-4 py-2 border border-gray-300'>";
-                    echo "<a href='edit_laporan.php?id=" . $row['id_laporan'] . "' class='text-blue-600 hover:underline'>Edit</a> | ";
-                    echo "<a href='hapus_laporan.php?id=" . $row['id_laporan'] . "' class='text-red-600 hover:underline' onclick='return confirm(\"Apakah Anda yakin ingin menghapus laporan ini?\");'>Hapus</a>";
+                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_laporan'] . "</td>";
+                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['status'] . "</td>";
                     echo "</td>";
                     echo "</tr>";
                 }

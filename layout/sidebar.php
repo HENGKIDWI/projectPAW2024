@@ -15,7 +15,7 @@
                 echo '<a href="../../dashboard/admin/Struktural_sekolah.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-building mr-2"></i>Input Struktural Sekolah</a>';
                 echo '<a href="../../dashboard/admin/kelolaLoginPengguna.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-user-lock mr-2"></i>Kelola Akun Pengguna</a>';
                 echo '<a href="../../dashboard/admin/edit-profile.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-user-cog mr-2"></i>Edit Profil Admin</a>';
-                echo '<a href="../../dashboard/admin/buat_jadwal.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-info-circle mr-2"></i>Buat Jadwal</a>';
+                echo '<a href="../../dashboard/admin/buat_jadwal.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-calendar-plus mr-2"></i>Buat Jadwal</a>';
                 echo '<a href="../../dashboard/admin/aboutus.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-info-circle mr-2"></i>About Us</a>';
             }
             // Jika role adalah guru
@@ -23,13 +23,13 @@
                 echo '<a href="../../dashboard/guru/index.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</a>';
                 echo '<a href="../../dashboard/guru/Jadwal_Mengajar.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-calendar-alt mr-2"></i>Jadwal Mengajar</a>';
                 echo '<a href="../../dashboard/guru/input_absen.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-check-circle mr-2"></i>Absensi</a>';
-                echo '<a href="../../dashboard/guru/materi_belajar.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-book-open mr-2"></i>Materi Belajar</a>';
+                echo '<a href="../../dashboard/guru/materi_belajar.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-book-open mr-2"></i>Upload Materi Belajar</a>';
                 echo '<a href="../../dashboard/guru/riwayat_tugas.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-tasks mr-2"></i>Tugas</a>';
                 echo '<a href="../../dashboard/guru/input_nilai.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-pencil-alt mr-2"></i>Input Nilai</a>';
                 echo '<a href="../../dashboard/guru/struktural_kelas.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-sitemap mr-2"></i>Struktural Kelas</a>';
-                echo '<a href="../../dashboard/guru/KelasMinatBakat.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-graduation-cap mr-2"></i>Kelas Minat Bakat</a>';
+                echo '<a href="../../dashboard/guru/DaftarKelasMinat.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-graduation-cap mr-2"></i>Kelas Minat Bakat</a>';
                 echo '<a href="../../dashboard/guru/bank_soal.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-file-upload mr-2"></i>Input Bank Soal</a>';
-                echo '<a href="../../dashboard/guru/input_rapot.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-file-upload mr-2"></i>Input Rapot</a>';
+                echo '<a href="../../dashboard/guru/input_rapot.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-file-alt mr-2"></i></i>Input Rapot</a>';
                 echo '<a href="../../dashboard/guru/pelanggaran_siswa.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-exclamation-triangle mr-2"></i>Pelanggaran Siswa</a>';
                 echo '<a href="../../dashboard/guru/Laporan.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-clipboard-list mr-2"></i>Laporan Kerusakan/Kekurangan Fasilitas</a>';
             }

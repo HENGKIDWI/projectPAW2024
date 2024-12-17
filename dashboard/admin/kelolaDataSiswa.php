@@ -7,22 +7,6 @@ if (!isset($_SESSION['nama_lengkap'])) {
     exit;
 }
 
-// Proses Hapus Kelas
-if (isset($_POST['hapus_kelas'])) {
-    $id_kelas = $_POST['id_kelas'];
-
-    // Query untuk menghapus kelas
-    $query_hapus = "DELETE FROM kelas WHERE id_kelas = '$id_kelas'";
-
-    if (mysqli_query($conn, $query_hapus)) {
-        // Penghapusan berhasil, redirect kembali
-        header("Location: kelolaDataSiswa.php?success=1");
-        exit;
-    } else {
-        echo "Error: " . mysqli_error($conn);
-    }
-}
-
 // Filter berdasarkan GET parameter
 $filter_tingkat = isset($_GET['tingkat']) ? $_GET['tingkat'] : '';
 $filter_kelas   = isset($_GET['id_kelas']) ? $_GET['id_kelas'] : '';
@@ -90,20 +74,14 @@ $result_kelas = mysqli_query($conn, $query_kelas);
             <!-- Cards Kelas -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <?php while ($kelas = mysqli_fetch_assoc($result_kelas)): ?>
-                <div class="bg-blue-200 text-gray-800 rounded-lg shadow-md p-4 hover:bg-green-100 transition duration-300">
-                    <h3 class="text-xl font-bold mb-2">
-                        <i class="fas fa-chalkboard"></i> 
-                        Kelas <?php echo htmlspecialchars($kelas['tingkat']); ?>  <?php echo htmlspecialchars($kelas['nama_kelas']); ?>
+                <a href="?tingkat=<?php echo urlencode($kelas['tingkat']); ?>&id_kelas=<?php echo $kelas['id_kelas']; ?>" 
+                   class="bg-blue-200 text-gray-800 rounded-lg shadow-md p-4 hover:bg-green-100 transition duration-300">
+                   <h3 class="text-xl font-bold mb-2">
+                     <i class="fas fa-chalkboard"></i> 
+                     Kelas <?php echo htmlspecialchars($kelas['tingkat']); ?>  <?php echo htmlspecialchars($kelas['nama_kelas']); ?>
                     </h3>
                     <p class="text-sm text-gray-600">Klik untuk melihat siswa di kelas ini.</p>
-                    <!-- Form Hapus -->
-                    <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kelas ini?');">
-                        <input type="hidden" name="id_kelas" value="<?php echo $kelas['id_kelas']; ?>">
-                        <button type="submit" name="hapus_kelas" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition duration-300 mt-2">
-                            <i class="fas fa-trash-alt mr-2"></i> Hapus
-                        </button>
-                    </form>
-                </div>
+                </a>
                 <?php endwhile; ?>
             </div>
 
@@ -136,7 +114,12 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                                 <td class="py-3 px-4"><?php echo htmlspecialchars($row['no_telp']); ?></td>
                                 <td class="py-3 px-4"><?php echo htmlspecialchars($row['jenis_kelamin']); ?></td>
                                 <td class="py-3 px-4">
-                                    <!-- Button Edit & Delete -->
+                                    <button onclick="showEditPopup('<?php echo $row['id_siswa']; ?>')" class="bg-yellow-500 text-white rounded-lg shadow-md p-2 hover:bg-yellow-700 transition duration-300">
+                                        Edit
+                                    </button>
+                                    <button onclick="confirmDelete('<?php echo $row['id_siswa']; ?>')" class="bg-red-500 text-white rounded-lg shadow-md p-2 hover:bg-red-700 transition duration-300">
+                                        Hapus
+                                    </button>
                                 </td>
                             </tr>
                             <?php endwhile; ?>
@@ -185,6 +168,61 @@ $result_kelas = mysqli_query($conn, $query_kelas);
         </div>
     </div>
 </div>
+
+<!-- Edit Popup -->
+<div id="editPopup" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-md p-6 w-1/2">
+        <h2 class="text-xl font-bold mb-4">Edit Siswa</h2>
+        <form id="editForm" action="kelolaDataSiswaEdit.php" method="POST">
+            <input type="hidden" name="id_siswa" id="editIdSiswa">
+            <div class="mb-4">
+                <label for="editNama" class="block text-gray-700">Nama Lengkap</label>
+                <input type="text" name="nama" id="editNama" class="w-full p-2 border border-gray-300 rounded-lg">
+            </div>
+            <div class="mb-4">
+                <label for="editAlamat" class="block text-gray-700">Alamat</label>
+                <input type="text" name="alamat" id="editAlamat" class="w-full p-2 border border-gray-300 rounded-lg">
+            </div>
+            <div class="mb-4">
+                <label for="editTanggalLahir" class="block text-gray-700">Tanggal Lahir</label>
+                <input type="date" name="tanggal_lahir" id="editTanggalLahir" class="w-full p-2 border border-gray-300 rounded-lg">
+            </div>
+            <div class="mb-4">
+                <label for="editNoTelp" class="block text-gray-700">No Telp</label>
+                <input type="text" name="no_telp" id="editNoTelp" class="w-full p-2 border border-gray-300 rounded-lg">
+            </div>
+            <div class="mb-4">
+                <label for="editJenisKelamin" class="block text-gray-700">Jenis Kelamin</label>
+                <select name="jenis_kelamin" id="editJenisKelamin" class="w-full p-2 border border-gray-300 rounded-lg">
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                </select>
+            </div>
+            <div class="flex justify-end">
+                <button type="button" onclick="hideEditPopup()" class="bg-gray-500 text-white rounded-lg shadow-md p-2 hover:bg-gray-700 transition duration-300 mr-2">Batal</button>
+                <button type="submit" class="bg-blue-500 text-white rounded-lg shadow-md p-2 hover:bg-blue-700 transition duration-300">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showEditPopup(id_siswa) {
+        document.getElementById('editIdSiswa').value = id_siswa;
+        // Fetch existing data and populate the form fields (optional)
+        document.getElementById('editPopup').classList.remove('hidden');
+    }
+
+    function hideEditPopup() {
+        document.getElementById('editPopup').classList.add('hidden');
+    }
+
+    function confirmDelete(id_siswa) {
+        if (confirm('Apakah Anda yakin ingin menghapus siswa ini?')) {
+            window.location.href = 'kelolaDataSiswaHapus.php?id_siswa=' + id_siswa;
+        }
+    }
+</script>
 
 <?php mysqli_close($conn); ?>
 </body>

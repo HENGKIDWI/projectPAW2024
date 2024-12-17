@@ -13,10 +13,10 @@ $guru_id = $_SESSION['guru_id'];
 // Fungsi untuk mengambil jadwal mengajar berdasarkan guru_id
 function getJadwalMengajar($guru_id) {
     global $conn;
-    $query = "SELECT j.id_jadwal, j.hari, j.jam_mulai, j.jam_selesai, mp.nama_pelajaran, k.nama_kelas
-              FROM jadwal j
-              JOIN mata_pelajaran mp ON j.mata_pelajaran_id = mp.id_mata_pelajaran
-              JOIN kelas k ON j.kelas_id = k.id_kelas
+    $query = "SELECT j.id_jadwal, j.hari, j.jam_mulai, j.jam_selesai, mp.nama_pelajaran, k.nama_kelas, k.tingkat
+              FROM jadwal AS j
+              JOIN mata_pelajaran AS mp ON j.mata_pelajaran_id = mp.id_mata_pelajaran
+              JOIN kelas AS k ON j.kelas_id = k.id_kelas
               WHERE j.guru_id = '$guru_id'
               ORDER BY j.hari, j.jam_mulai";
 
@@ -53,8 +53,7 @@ $nama_guru = $_SESSION['nama_lengkap'];
           <tr>
             <th class="px-4 py-2 border border-gray-300 bg-blue-100">No</th>
             <th class="px-4 py-2 border border-gray-300 bg-blue-100">Hari</th>
-            <th class="px-4 py-2 border border-gray-300 bg-blue-100">Jam Mulai</th>
-            <th class="px-4 py-2 border border-gray-300 bg-blue-100">Jam Selesai</th>
+            <th class="px-4 py-2 border border-gray-300 bg-blue-100">Jam Mengajar</th>
             <th class="px-4 py-2 border border-gray-300 bg-blue-100">Mata Pelajaran</th>
             <th class="px-4 py-2 border border-gray-300 bg-blue-100">Kelas</th>
           </tr>
@@ -63,16 +62,16 @@ $nama_guru = $_SESSION['nama_lengkap'];
           <?php
           $result = getJadwalMengajar($guru_id);
           if (mysqli_num_rows($result) > 0) {
-              while ($row = mysqli_fetch_assoc($result)) {
-                  echo "<tr>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['id_jadwal'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['hari'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['jam_mulai'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['jam_selesai'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_pelajaran'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
-                  echo "</tr>";
-              }
+            $no = 1;
+            while ($row = mysqli_fetch_assoc($result)) {
+              echo "<tr>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['hari'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['jam_mulai'] . " - " . $row['jam_selesai'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_pelajaran'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row["tingkat"] . $row['nama_kelas'] . "</td>";
+              echo "</tr>";
+            }
           } else {
               echo "<tr><td colspan='6' class='px-4 py-2 border border-gray-300 text-center'>Tidak ada jadwal mengajar untuk saat ini.</td></tr>";
           }
