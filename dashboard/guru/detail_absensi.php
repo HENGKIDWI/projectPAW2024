@@ -2,59 +2,82 @@
 include "../../koneksi.php";
 session_start();
 
-$kelas_id = $_GET['kelas'];
-$mata_pelajaran_id = $_GET['mapel'];
-$tanggal = $_GET['tanggal'];
+// Ambil parameter query dengan sanitasi
+$kelas_id = isset($_GET['kelas']) ? mysqli_real_escape_string($conn, $_GET['kelas']) : null;
+$mata_pelajaran_id = isset($_GET['mapel']) ? mysqli_real_escape_string($conn, $_GET['mapel']) : null;
+$tanggal = isset($_GET['tanggal']) ? mysqli_real_escape_string($conn, $_GET['tanggal']) : null;
 
-// data murit
+// to int
+function toInt($mapel)
+{
+    global $conn;
+    $query = "SELECT id_mata_pelajaran FROM mata_pelajaran WHERE nama_pelajaran = '$mapel'";
+    $result = mysqli_query($conn, $query);
+    $row = mysqli_fetch_assoc($result);
+    return $row['id_mata_pelajaran'];
+}
+
+// Fungsi untuk mengambil daftar murid berdasarkan kelas
 function getDaftarMurid($kelas_id)
 {
-  global $conn;
-  $kelas_id = mysqli_real_escape_string($conn, $kelas_id);
-  $query = "SELECT * FROM siswa WHERE kelas_id = '$kelas_id' ORDER BY nama_lengkap";
-  $result = mysqli_query($conn, $query);
-
-  return $result ? $result : handleDatabaseError($conn, $query);
-}
-
-// get absensi
-function get_absensi($conn, $id_siswa, $kelas_id, $mata_pelajaran_id, $tanggal){
-    $query = "SELECT status_absensi FROM absensi WHERE id_siswa = '$id_siswa' AND kelas_id = '$kelas_id' AND id_mata_pelajaran = '$mata_pelajaran_id' AND tanggal = '$tanggal'";
+    global $conn;
+    $query = "SELECT * FROM siswa WHERE kelas_id = '$kelas_id' ORDER BY nama_lengkap";
     $result = mysqli_query($conn, $query);
-    return $result ? $result : handleDatabaseError($conn, $query);
+    if (!$result) {
+        die("Error: " . mysqli_error($conn));
+    }
+    return $result;
 }
 
-// Function to update attendance
+// Fungsi untuk mengambil data absensi
+function get_absensi($conn, $id_siswa, $tanggal)
+{
+    $query = "SELECT * FROM absensi 
+              WHERE id_siswa = '$id_siswa' 
+              AND tanggal = '$tanggal'";
+    $result = mysqli_query($conn, $query);
+    if (!$result) {
+        die("Error: " . mysqli_error($conn));
+    }
+    return $result;
+}
+
+// Fungsi untuk memperbarui data absensi
 function update_absensi($conn, $kelas_id, $mata_pelajaran_id, $tanggal, $absensi_data)
 {
-    $success = true;
     foreach ($absensi_data as $id_siswa => $status) {
+        // Query untuk update data absensi
         $query = "UPDATE absensi 
                   SET status_absensi = '$status'
-                  WHERE kelas_id = '$kelas_id'
-                  AND id_mata_pelajaran = '$mata_pelajaran_id'
-                  AND tanggal = '$tanggal'";
+                  WHERE id_siswa = '$id_siswa' 
+                    AND kelas_id = '$kelas_id' 
+                    AND id_mata_pelajaran = '$mata_pelajaran_id' 
+                    AND tanggal = '$tanggal'";
 
         if (!mysqli_query($conn, $query)) {
-            $success = false;
-            break;
+            return false; // Kembalikan false jika ada error
         }
     }
-
-    return $success;
+    return true; // Kembalikan true jika semua update berhasil
 }
 
-if (isset($_POST["update_absensi"])) {
-    $absensi_data = $_POST['absensi'];
+// Proses form update absensi
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["update_absensi"])) {
+    $absensi_data = $_POST['absensi']; // Data absensi dari form
+    $kelas_id = isset($_GET['kelas']) ? mysqli_real_escape_string($conn, $_GET['kelas']) : null;
+    $mapel = isset($_GET['mapel']) ? mysqli_real_escape_string($conn, $_GET['mapel']) : null;
+    $mata_pelajaran_id = toInt($mapel);
+    $tanggal = isset($_GET['tanggal']) ? mysqli_real_escape_string($conn, $_GET['tanggal']) : null;
 
     if (update_absensi($conn, $kelas_id, $mata_pelajaran_id, $tanggal, $absensi_data)) {
         echo "<script>alert('Data absensi berhasil diperbarui.');</script>";
-        header("Location: input_absen.php");
+        echo "<script>window.location.href = 'input_absen.php';</script>";
         exit();
     } else {
         echo "<script>alert('Terjadi kesalahan saat memperbarui absensi.');</script>";
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -68,107 +91,81 @@ if (isset($_POST["update_absensi"])) {
 </head>
 
 <body class="bg-gray-100 text-gray-800">
-    <!-- Sidebar -->
     <?php include '../../layout/sidebar.php'; ?>
-
-    <!-- Navbar -->
-    <header id="header" class="bg-blue-600 text-white py-4 transition-all duration-300">
+    <header class="bg-blue-600 text-white py-4">
         <?php include '../../layout/header.php'; ?>
     </header>
 
-    <!-- Main Content -->
-    <div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
+    <div class="container mx-auto mt-8 px-4">
         <h2 class="text-2xl font-bold text-center mb-6">Daftar Murid</h2>
 
         <div class="bg-white shadow-md rounded-lg p-6">
-            <h3 class="text-xl font-semibold mb-4">
-                Kelas: <?php echo $kelas_id; ?>
-            </h3>
-            <h3 class="text-xl font-semibold mb-4">
-                Mata Pelajaran: <?php echo $mata_pelajaran_id; ?>,
-            </h3>
-            <h3 class="text-xl font-semibold mb-4">
-                Tanggal: <?php echo $tanggal; ?>
-            </h3>
+            <?php if ($kelas_id && $mata_pelajaran_id): ?>
+                <h3 class="text-xl font-semibold mb-4">Kelas = <?= $kelas_id ?></h3>
+                <h3 class="text-xl font-semibold mb-4">Mata pelajaran = <?= $mata_pelajaran_id ?></h3>
+                <h3 class="text-xl font-semibold mb-4">tanggal = <?= $tanggal ?></h3>
+                <form action="" method="POST">
+                    <input type="hidden" name="kelas" value="<?php echo htmlspecialchars($kelas_id); ?>">
+                    <input type="hidden" name="mata_pelajaran" value="<?php echo htmlspecialchars($mata_pelajaran_id); ?>">
+                    <input type="hidden" name="tanggal" value="<?php echo htmlspecialchars($tanggal); ?>">
+
+                    <table class="table-auto w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border bg-blue-100">NO</th>
+                                <th class="px-4 py-2 border bg-blue-100">Nama</th>
+                                <th class="px-4 py-2 border bg-blue-100">NISN</th>
+                                <th class="px-4 py-2 border bg-blue-100">Status Absensi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $daftar_murid = getDaftarMurid($kelas_id);
+                            $no = 1;
+                            while ($row = mysqli_fetch_assoc($daftar_murid)) {
+                                $default_status = 'izin'; // Nilai default jika tidak ada data absensi
+
+                                // Periksa data absensi
+                                $absensi_result = get_absensi($conn, $row['id_siswa'],  $tanggal);
+                                $absensi_row = mysqli_num_rows($absensi_result);
+                                $absensi_row = mysqli_fetch_assoc($absensi_result);
+                                $default_status = $absensi_row['status_absensi'];
+                                // Set default dari data absensi
 
 
-            <!-- Tabel Daftar Murid (Right Side) -->
-            <div class="w-2/2 bg-white shadow-md rounded-lg p-6">
-                <?php if ($kelas_id && $mata_pelajaran_id): ?>
-                    <h3 class="text-xl font-semibold mb-4">Daftar Murid</h3>
-                    <form action="" method="POST">
-                        <input type="hidden" name="kelas" value="<?php echo $kelas_id; ?>">
-                        <input type="hidden" name="mata_pelajaran" value="<?php echo $mata_pelajaran_id; ?>">
-                        <input type="hidden" name="tanggal" value="<?php echo $tanggal; ?>">
-                        <table class="table-auto w-full text-left border-collapse border border-gray-300">
-                            <thead>
-                                <tr>
-                                    <th class="px-4 py-2 border border-gray-300 bg-blue-100">NO</th>
-                                    <th class="px-4 py-2 border border-gray-300 bg-blue-100">Nama</th>
-                                    <th class="px-4 py-2 border border-gray-300 bg-blue-100">NISN</th>
-                                    <th class="px-4 py-2 border border-gray-300 bg-blue-100">Mata Pelajaran</th>
-                                    <th class="px-4 py-2 border border-gray-300 bg-blue-100">Status Absensi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $daftar_murid = getDaftarMurid($kelas_id);
-                                $no = 1;
-                                while ($row = mysqli_fetch_assoc($daftar_murid)) {
-                                    $absensi_result = get_absensi($conn, $row['nis'], $kelas_id, $mata_pelajaran_id, $tanggal);
-                                    $default_status = 'hadir'; // Default status if no record found
+                                echo "<tr>";
+                                echo "<td class='px-4 py-2 border'>" . $no++ . "</td>";
+                                echo "<td class='px-4 py-2 border'>" . htmlspecialchars($row['nama_lengkap']) . "</td>";
+                                echo "<td class='px-4 py-2 border'>" . htmlspecialchars($row['nis']) . "</td>";
+                                echo "<td class='px-4 py-2 border'>";
 
-                                    if ($absensi_result && mysqli_num_rows($absensi_result) > 0) {
-                                        $absensi_row = mysqli_fetch_assoc($absensi_result);
-                                        $default_status = $absensi_row['status_absensi'];
-                                    }
-
-                                    echo "<tr>";
-                                    echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
-                                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_lengkap'] . "</td>";
-                                    echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nis'] . "</td>";
-                                    echo "<td class='px-4 py-2 border border-gray-300'>" . $mata_pelajaran_id . "</td>";
-
-                                    echo "<td class='px-4 py-2 border border-gray-300'>";
-                                    echo "<select name='absensi[" . $row['nis'] . "]' class='w-full p-1 border border-gray-300 rounded' required>";
-                                    $status_options = ['hadir', 'izin', 'sakit', 'alpa'];
-                                    foreach ($status_options as $status) {
-                                        $selected = ($status == $default_status) ? 'selected' : '';
-                                        echo "<option value='$status' $selected>$status</option>";
-                                    }
-                                    echo "</select>";
-                                    echo "</td>";
-                                    echo "</tr>";
+                                // Dropdown absensi
+                                echo "<select name='absensi[" . htmlspecialchars($row['id_siswa']) . "]' class='w-full p-1 border rounded'>";
+                                foreach (['hadir', 'izin', 'sakit', 'alpa'] as $status) {
+                                    $selected = ($status === $default_status) ? 'selected' : ''; // Pilih status default
+                                    echo "<option value='$status' $selected>" . ucfirst($status) . "</option>";
                                 }
-                                ?>
-                            </tbody>
-                        </table>
-                    </form>
-                <?php else: ?>
-                    <p class="text-center text-gray-500">Pilih kelas dan mata pelajaran untuk menampilkan daftar murid.</p>
-                <?php endif; ?>
-            </div>
-        </div>
+                                echo "</select>";
+                                echo "</td>";
+                                echo "</tr>";
+                            }
+                            ?>
 
-        <div class="mt-4 flex justify-between">
-            <a href="input_absen.php" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
-                Kembali
-            </a>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" name="update_absensi">
-                Cetak
-            </button>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" name="update_absensi">
-                Perbarui Absensi
-            </button>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-4 flex justify-end gap-4">
+                        <a href="input_absen.php" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Kembali</a>
+                        <button type="submit" name="update_absensi" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Perbarui Absensi</button>
+                    </div>
+                </form>
+            <?php else: ?>
+                <p class="text-center text-gray-500">Pilih kelas dan mata pelajaran untuk menampilkan daftar murid.</p>
+            <?php endif; ?>
         </div>
-        </form>
-    </div>
     </div>
 
-    <!-- Footer -->
-    <?php
-    require_once "../../layout/footer.php"
-    ?>
+    <?php include '../../layout/footer.php'; ?>
 </body>
 
 </html>
