@@ -86,40 +86,30 @@ $result_mapel = mysqli_query($conn, $query_mapel);
                     <?php endwhile; ?>
                 </div>
 
-                <!-- Input Nilai Spiritual & Sosial -->
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label for="nilai_spiritual" class="block text-sm font-medium">Nilai Spiritual</label>
-                        <select name="nilai_spiritual" id="nilai_spiritual" class="w-full px-3 py-2 border rounded-md" required>
-                            <option value="Baik">Baik</option>
-                            <option value="Cukup">Cukup</option>
-                            <option value="Kurang">Kurang</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="nilai_sosial" class="block text-sm font-medium">Nilai Sosial</label>
-                        <select name="nilai_sosial" id="nilai_sosial" class="w-full px-3 py-2 border rounded-md" required>
-                            <option value="Baik">Baik</option>
-                            <option value="Cukup">Cukup</option>
-                            <option value="Kurang">Kurang</option>
-                        </select>
-                    </div>
+                <!-- Nilai Rata-Rata -->
+                <div class="mb-4">
+                    <label for="nilai_rata_rata" class="block text-sm font-medium">Nilai Rata-Rata</label>
+                    <input type="text" name="nilai_rata_rata" id="nilai_rata_rata" class="w-full px-3 py-2 border rounded-md bg-gray-200" placeholder="Otomatis dihitung" readonly>
                 </div>
 
-                <!-- Input Kehadiran -->
-                <div class="grid grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label for="sakit" class="block text-sm font-medium">Sakit</label>
-                        <input type="number" name="sakit" id="sakit" class="w-full px-3 py-2 border rounded-md" min="0" placeholder="Jumlah hari">
-                    </div>
-                    <div>
-                        <label for="izin" class="block text-sm font-medium">Izin</label>
-                        <input type="number" name="izin" id="izin" class="w-full px-3 py-2 border rounded-md" min="0" placeholder="Jumlah hari">
-                    </div>
-                    <div>
-                        <label for="alfa" class="block text-sm font-medium">Tanpa Keterangan</label>
-                        <input type="number" name="alfa" id="alfa" class="w-full px-3 py-2 border rounded-md" min="0" placeholder="Jumlah hari">
-                    </div>
+                <!-- Input Ekstrakurikuler -->
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold mb-2">Ekstrakurikuler</h3>
+                    <input type="text" name="ekskul" class="w-full px-3 py-2 border rounded-md" placeholder="Nama Ekstrakurikuler" required>
+                    <input type="number" name="nilai_ekskul" class="w-full px-3 py-2 border rounded-md mt-2" placeholder="Nilai Ekstrakurikuler" min="0" max="100" required>
+                </div>
+
+                <!-- Input Prestasi -->
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold mb-2">Prestasi Siswa</h3>
+                    <input type="text" name="prestasi_akademik" class="w-full px-3 py-2 border rounded-md" placeholder="Prestasi Akademik">
+                    <input type="text" name="prestasi_non_akademik" class="w-full px-3 py-2 border rounded-md mt-2" placeholder="Prestasi Non-Akademik">
+                </div>
+
+                <!-- Catatan Wali Kelas -->
+                <div class="mb-4">
+                    <label for="catatan_wali_kelas" class="block text-sm font-medium">Catatan Wali Kelas</label>
+                    <textarea name="catatan_wali_kelas" rows="3" class="w-full px-3 py-2 border rounded-md" placeholder="Catatan perkembangan siswa..."></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">
@@ -130,5 +120,28 @@ $result_mapel = mysqli_query($conn, $query_mapel);
     </div>
 
     <?php require_once "../../layout/footer.php"; ?>
+
+    <!-- JavaScript Hitung Rata-Rata -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const nilaiInputs = document.querySelectorAll('input[name="nilai_pengetahuan[]"], input[name="nilai_keterampilan[]"]');
+            const rataRataInput = document.getElementById("nilai_rata_rata");
+
+            function hitungRataRata() {
+                let total = 0, count = 0;
+                nilaiInputs.forEach(input => {
+                    const nilai = parseFloat(input.value);
+                    if (!isNaN(nilai)) {
+                        total += nilai;
+                        count++;
+                    }
+                });
+                const rataRata = count > 0 ? (total / count).toFixed(2) : 0;
+                rataRataInput.value = rataRata;
+            }
+
+            nilaiInputs.forEach(input => input.addEventListener("input", hitungRataRata));
+        });
+    </script>
 </body>
 </html>

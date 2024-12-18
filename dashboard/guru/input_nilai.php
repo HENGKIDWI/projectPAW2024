@@ -102,8 +102,8 @@ if ($selected_kelas && $selected_tugas) {
   <title>Input Nilai Siswa</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
+    /* Custom scrollbar  */
+    ::-webkit-scrollbar { 
       width: 8px;
     }
     ::-webkit-scrollbar-track {

@@ -11,6 +11,6 @@ $id = $_GET['id'];
 $query = "DELETE FROM guru WHERE id_guru = $id";
 mysqli_query($conn, $query);
 
-header("Location: index.php");
+header("Location: tampilanGuru.php");
 exit;
 ?>

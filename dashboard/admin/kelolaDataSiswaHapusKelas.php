@@ -2,23 +2,25 @@
 include "../../koneksi.php";
 session_start();
 
-if (!isset($_SESSION['nama_lengkap'])) {
-    header("Location: ../../login.php");
-    exit;
-}
+// Pastikan ID Kelas ada dan valid
+if (isset($_POST['id_kelas']) && !empty($_POST['id_kelas'])) {
+    $id_kelas = $_POST['id_kelas'];
 
-if (isset($_GET['id_kelas'])) {
-    $id_kelas = $_GET['id_kelas'];
-    $query = "DELETE FROM kelas WHERE id_kelas = $id_kelas";
+    // Query untuk menghapus kelas berdasarkan ID
+    $query = "DELETE FROM kelas WHERE id_kelas = '$id_kelas'";
 
     if (mysqli_query($conn, $query)) {
-        header("Location: kelolaDataSiswa.php");
+        // Set pesan sukses di session
+        $_SESSION['message'] = "Data kelas berhasil dihapus!";
+        header("Location: kelolaDataSiswa.php"); // Atau halaman yang relevan
         exit;
     } else {
-        echo "Gagal menghapus kelas.";
+        // Set pesan error di session jika gagal
+        $_SESSION['message'] = "Gagal menghapus kelas: " . mysqli_error($conn);
+        header("Location: kelolaDataSiswa.php"); // Atau halaman yang relevan
+        exit;
     }
 } else {
-    header("Location: kelolaDataSiswa.php");
-    exit;
+    echo "ID kelas tidak ditemukan.";
 }
 ?>

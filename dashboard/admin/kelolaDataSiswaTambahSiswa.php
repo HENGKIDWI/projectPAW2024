@@ -17,6 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $kelas_id = mysqli_real_escape_string($conn, $_POST['kelas_id']);
     $kontak_orang_tua = mysqli_real_escape_string($conn, $_POST['kontak_orang_tua']);
 
+    // Validasi panjang nomor telepon
+    if (strlen($kontak_orang_tua) > 15) {
+        echo "<script>alert('Nomor telepon tidak boleh lebih dari 15 karakter.'); window.location.href='kelolaDataSiswaTambahSiswa.php';</script>";
+        exit;
+    }
+
     // Membuat username dan password sama dengan NISN
     $username = $nisn;
     $password = $nisn;
@@ -104,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="kontak_orang_tua">Kontak Orang Tua</label>
                 <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="kontak_orang_tua" name="kontak_orang_tua" type="text" placeholder="Kontak Orang Tua" required>
+                <small>Tidak boleh melebihi 15 angka</small>
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="tanggal_lahir">Tanggal Lahir</label>

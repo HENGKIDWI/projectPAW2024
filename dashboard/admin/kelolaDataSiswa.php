@@ -9,15 +9,53 @@ if (!isset($_SESSION['nama_lengkap'])) {
 
 // Filter berdasarkan GET parameter
 $filter_tingkat = isset($_GET['tingkat']) ? $_GET['tingkat'] : '';
-$filter_kelas   = isset($_GET['id_kelas']) ? $_GET['id_kelas'] : '';
+$filter_kelas = isset($_GET['id_kelas']) ? $_GET['id_kelas'] : '';
+$filter_nama_siswa = isset($_GET['nama_siswa']) ? $_GET['nama_siswa'] : '';
+$filter_nis_siswa = isset($_GET['nis_siswa']) ? $_GET['nis_siswa'] : '';
+
+// Menentukan teks judul berdasarkan kondisi filter
+if (!empty($filter_kelas)) {
+    // Query untuk mendapatkan nama_kelas berdasarkan id_kelas
+    $query_kelas_filter = "SELECT nama_kelas, tingkat FROM kelas WHERE id_kelas = '$filter_kelas' LIMIT 1";
+    $result_kelas_filter = mysqli_query($conn, $query_kelas_filter);
+    $kelas_data = mysqli_fetch_assoc($result_kelas_filter);
+    $nama_kelas = $kelas_data['nama_kelas'];
+    $tingkat = $kelas_data['tingkat'];
+    
+    // Judul berdasarkan nama kelas
+    $judul = "Data Siswa Kelas: $tingkat $nama_kelas";
+} else {
+    $judul = "Data Siswa Keseluruhan";
+}
 
 // Query siswa
 $query = "SELECT siswa.*, kelas.nama_kelas, kelas.tingkat 
           FROM siswa 
           JOIN kelas ON siswa.kelas_id = kelas.id_kelas";
 
+// Array untuk menampung kondisi filter
+$conditions = [];
+
+// Menambahkan filter tingkat dan kelas
 if (!empty($filter_tingkat) && !empty($filter_kelas)) {
-    $query .= " WHERE kelas.tingkat = '$filter_tingkat' AND kelas.id_kelas = '$filter_kelas'";
+    $conditions[] = "kelas.tingkat = '$filter_tingkat' AND kelas.id_kelas = '$filter_kelas'";
+} elseif (!empty($filter_tingkat)) {
+    $conditions[] = "kelas.tingkat = '$filter_tingkat'";
+}
+
+// Menambahkan filter berdasarkan nama siswa
+if (!empty($filter_nama_siswa)) {
+    $conditions[] = "siswa.nama_lengkap LIKE '%$filter_nama_siswa%'";
+}
+
+// Menambahkan filter berdasarkan nis siswa
+if (!empty($filter_nis_siswa)) {
+    $conditions[] = "siswa.nis LIKE '%$filter_nis_siswa%'";
+}
+
+// Menggabungkan kondisi filter jika ada
+if (count($conditions) > 0) {
+    $query .= " WHERE " . implode(" AND ", $conditions);
 }
 
 $result = mysqli_query($conn, $query);
@@ -38,9 +76,16 @@ $result_kelas = mysqli_query($conn, $query_kelas);
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
+    <?php if (isset($_SESSION['message'])): ?>
+        <script>
+            alert("<?php echo $_SESSION['message']; ?>");
+        </script>
+        <?php unset($_SESSION['message']); ?> <!-- Menghapus pesan setelah ditampilkan -->
+    <?php endif; ?>
 
 <div class="flex min-h-screen">
     <!-- Sidebar -->
@@ -56,8 +101,15 @@ $result_kelas = mysqli_query($conn, $query_kelas);
         <!-- Container -->
         <div class="container mx-auto mt-8 px-6">
             <!-- Header -->
+            <h1 class="text-4xl font-bold text-white bg-gradient-to-l from-blue-900 via-blue-800 to-blue-500 p-6 rounded-lg shadow-lg mb-4">
+                Kelola Data Siswa
+            </h1>
+            
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-3xl font-bold text-gray-700">Kelola Data Siswa</h2>
+                <a type="submit" href="kelolaDataSiswa.php" class="flex items-center justify-center mb-4 px-4 py-2 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-semibold rounded-md shadow-lg hover:bg-gradient-to-r hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 transition duration-300">
+                    <i class="fas fa-sync-alt mr-2"></i> Refresh
+                </a>
+
                 <div class="space-x-4">
                     <a href="kelolaDataSiswaTambahSiswa.php" 
                        class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition duration-300">
@@ -68,10 +120,19 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                         class="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow hover:bg-yellow-600 transition duration-300">
                         <i class="fas fa-chalkboard-teacher mr-2"></i> Tambah Kelas
                     </button>
+                    <!-- Button untuk memunculkan pop-up Hapus -->
+                    <button data-toggle="modal" data-target="#hapusKelasModal" 
+                        class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition duration-300">
+                        <i class="fas fa-trash-alt mr-2"></i> Hapus Kelas
+                    </button>
+
                 </div>
             </div>
 
             <!-- Cards Kelas -->
+             <h2 class="text-3xl font-italic text-black bg-gradient-to-r from-blue-300 via-blue-100 to-gray-200 p-6 rounded-lg shadow-lg mb-4">
+                Filter Siswa Berdasarkan Kelas: 
+            </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <?php while ($kelas = mysqli_fetch_assoc($result_kelas)): ?>
                 <a href="?tingkat=<?php echo urlencode($kelas['tingkat']); ?>&id_kelas=<?php echo $kelas['id_kelas']; ?>" 
@@ -81,12 +142,29 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                      Kelas <?php echo htmlspecialchars($kelas['tingkat']); ?>  <?php echo htmlspecialchars($kelas['nama_kelas']); ?>
                     </h3>
                     <p class="text-sm text-gray-600">Klik untuk melihat siswa di kelas ini.</p>
+
                 </a>
                 <?php endwhile; ?>
             </div>
 
             <!-- Tabel Data Siswa -->
+             <div class="flex justify-between items-center mb-6">
+                 <form method="GET" action="kelolaDataSiswa.php" class="">
+                    <div class="flex space-x-4">
+                        <input type="text" name="nama_siswa" placeholder="Cari Nama Siswa" class="px-4 py-2 rounded-md border border-gray-300" value="<?php echo isset($_GET['nama_siswa']) ? $_GET['nama_siswa'] : ''; ?>" />
+
+                        <input type="text" name="nis_siswa" placeholder="Cari NIS Siswa" class="px-4 py-2 rounded-md border border-gray-300" value="<?php echo isset($_GET['nis_siswa']) ? $_GET['nis_siswa'] : ''; ?>" />
+
+                        <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-md">Filter</button>
+                    </div>
+                </form>
+
+            </div>
+            <!-- Data Siswa  -->
             <div class="bg-white rounded-lg shadow-md overflow-x-auto">
+                <h2 class="text-4xl font-bold text-white bg-gradient-to-r from-blue-900 via-blue-800 to-blue-500 p-6 rounded-lg shadow-lg mb-4">
+                     <?php echo $judul; ?>
+                </h2>
                 <table class="min-w-full table-auto">
                     <thead>
                         <tr class="bg-blue-600 text-white">
@@ -114,9 +192,9 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                                 <td class="py-3 px-4"><?php echo htmlspecialchars($row['no_telp']); ?></td>
                                 <td class="py-3 px-4"><?php echo htmlspecialchars($row['jenis_kelamin']); ?></td>
                                 <td class="py-3 px-4">
-                                    <button onclick="showEditPopup('<?php echo $row['id_siswa']; ?>')" class="bg-yellow-500 text-white rounded-lg shadow-md p-2 hover:bg-yellow-700 transition duration-300">
-                                        Edit
-                                    </button>
+                                    <a href="kelolaDataSiswaEdit.php?id_siswa=<?php echo $row['id_siswa']; ?>" 
+                                       class="bg-blue-500 text-white rounded-lg shadow-md p-2 hover:bg-blue-700 transition duration-300">
+                                        Edit</a>
                                     <button onclick="confirmDelete('<?php echo $row['id_siswa']; ?>')" class="bg-red-500 text-white rounded-lg shadow-md p-2 hover:bg-red-700 transition duration-300">
                                         Hapus
                                     </button>
@@ -169,53 +247,51 @@ $result_kelas = mysqli_query($conn, $query_kelas);
     </div>
 </div>
 
-<!-- Edit Popup -->
-<div id="editPopup" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-lg shadow-md p-6 w-1/2">
-        <h2 class="text-xl font-bold mb-4">Edit Siswa</h2>
-        <form id="editForm" action="kelolaDataSiswaEdit.php" method="POST">
-            <input type="hidden" name="id_siswa" id="editIdSiswa">
-            <div class="mb-4">
-                <label for="editNama" class="block text-gray-700">Nama Lengkap</label>
-                <input type="text" name="nama" id="editNama" class="w-full p-2 border border-gray-300 rounded-lg">
+<!-- Modal Hapus Kelas -->
+<div class="modal fade" id="hapusKelasModal" tabindex="-1" aria-labelledby="hapusKelasModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="hapusKelasModalLabel">Hapus Kelas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="mb-4">
-                <label for="editAlamat" class="block text-gray-700">Alamat</label>
-                <input type="text" name="alamat" id="editAlamat" class="w-full p-2 border border-gray-300 rounded-lg">
-            </div>
-            <div class="mb-4">
-                <label for="editTanggalLahir" class="block text-gray-700">Tanggal Lahir</label>
-                <input type="date" name="tanggal_lahir" id="editTanggalLahir" class="w-full p-2 border border-gray-300 rounded-lg">
-            </div>
-            <div class="mb-4">
-                <label for="editNoTelp" class="block text-gray-700">No Telp</label>
-                <input type="text" name="no_telp" id="editNoTelp" class="w-full p-2 border border-gray-300 rounded-lg">
-            </div>
-            <div class="mb-4">
-                <label for="editJenisKelamin" class="block text-gray-700">Jenis Kelamin</label>
-                <select name="jenis_kelamin" id="editJenisKelamin" class="w-full p-2 border border-gray-300 rounded-lg">
-                    <option value="Laki-laki">Laki-laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                </select>
-            </div>
-            <div class="flex justify-end">
-                <button type="button" onclick="hideEditPopup()" class="bg-gray-500 text-white rounded-lg shadow-md p-2 hover:bg-gray-700 transition duration-300 mr-2">Batal</button>
-                <button type="submit" class="bg-blue-500 text-white rounded-lg shadow-md p-2 hover:bg-blue-700 transition duration-300">Simpan</button>
-            </div>
-        </form>
+            <form action="kelolaDataSiswaHapusKelas.php" method="POST">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="id_kelas">Pilih Kelas untuk Dihapus</label>
+                        <select class="form-control" id="id_kelas" name="id_kelas" required>
+                            <option value="">-- Pilih Kelas --</option>
+                            <?php
+                            // Query untuk mendapatkan daftar kelas
+                            $query_kelas = "SELECT id_kelas, nama_kelas, tingkat FROM kelas ORDER BY tingkat, nama_kelas";
+                            $result_kelas = mysqli_query($conn, $query_kelas);
+
+                            // Menampilkan kelas dalam dropdown
+                            while ($kelas = mysqli_fetch_assoc($result_kelas)) {
+                                echo "<option value='" . $kelas['id_kelas'] . "'>" . htmlspecialchars($kelas['tingkat']) . " - " . htmlspecialchars($kelas['nama_kelas']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<script>
-    function showEditPopup(id_siswa) {
-        document.getElementById('editIdSiswa').value = id_siswa;
-        // Fetch existing data and populate the form fields (optional)
-        document.getElementById('editPopup').classList.remove('hidden');
-    }
 
-    function hideEditPopup() {
-        document.getElementById('editPopup').classList.add('hidden');
-    }
+<!-- Include Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
 
     function confirmDelete(id_siswa) {
         if (confirm('Apakah Anda yakin ingin menghapus siswa ini?')) {
