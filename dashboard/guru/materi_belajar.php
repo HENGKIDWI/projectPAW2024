@@ -9,13 +9,26 @@ if (!isset($_SESSION['nama_lengkap'])) {
 
 $nama_guru = $_SESSION['guru_id'];
 
-// Query untuk mendapatkan data kelas
-$query_kelas = "SELECT * FROM kelas ORDER BY tingkat, nama_kelas ASC";
-$result_kelas = mysqli_query($conn, $query_kelas);
-$kelas_list = [];
-while ($row = mysqli_fetch_assoc($result_kelas)) {
-    $kelas_list[$row['tingkat']][] = $row;
+// Fungsi untuk mendapatkan tingkat kelas
+function getTingkatKelas(){
+  global $conn;
+  $query = "SELECT DISTINCT tingkat FROM kelas";
+  $tingkat = mysqli_query($conn, $query);
+  return $tingkat;
 }
+
+// Fungsi untuk mendapatkan daftar kelas berdasarkan tingkat
+function getKelas($tingkat){
+  global $conn;
+  if (isset($_POST['tingkat_kelas'])){
+    $query = "SELECT id_kelas, nama_kelas FROM kelas WHERE tingkat = '$tingkat' ORDER BY nama_kelas ASC";
+    $kelas = mysqli_query($conn, $query);
+    return $kelas;
+  }
+}
+
+$selectTingkat = isset($_POST['tingkat_kelas']) ? $_POST['tingkat_kelas'] : '';
+$selectKelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
 
 // Proses untuk menyimpan data ke database
 if (isset($_POST["kirim"])) {
@@ -110,11 +123,13 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
           <label for="tingkat_kelas" class="block text-sm font-medium text-gray-700">Tingkat Kelas</label>
           <select id="tingkat_kelas" name="tingkat_kelas" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required onchange="this.form.submit()">
             <option value="">-- Pilih Tingkat --</option>
-            <?php while ($row = mysqli_fetch_assoc($result_tingkat)): ?>
-              <option value="<?php echo $row['tingkat']; ?>" <?php echo isset($_POST['tingkat_kelas']) && $_POST['tingkat_kelas'] == $row['tingkat'] ? 'selected' : ''; ?>>
-                <?php echo $row['tingkat']; ?>
-              </option>
-            <?php endwhile; ?>
+            <?php 
+            $tingkat_list = getTingkatKelas();
+            while ($row = mysqli_fetch_assoc($tingkat_list)) {
+                $selected = ($selectTingkat == $row['tingkat']) ? 'selected' : '';
+                echo "<option value='" . $row['tingkat'] . "' $selected>" . $row['tingkat'] . "</option>";
+            }
+            ?>
           </select>
         </div>
         <div class="mb-4">
@@ -122,13 +137,12 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
           <select id="kelas" name="kelas" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
             <option value="">-- Pilih Kelas --</option>
             <?php
-            if (isset($_POST['tingkat_kelas']) && !empty($_POST['tingkat_kelas'])) {
-                $tingkat_kelas_terpilih = $_POST['tingkat_kelas'];
-                if (isset($kelas_list[$tingkat_kelas_terpilih])) {
-                    foreach ($kelas_list[$tingkat_kelas_terpilih] as $kelas) {
-                        echo "<option value='{$kelas['id_kelas']}'>{$kelas['nama_kelas']}</option>";
-                    }
-                }
+            if (!empty($selectTingkat)){
+              $kelas_list = getKelas($selectTingkat);
+              while ($row = mysqli_fetch_assoc($kelas_list)) {
+                $selected = ($selectKelas == $row['id_kelas']) ? 'selected' : '';
+                echo "<option value='" . $row['id_kelas'] . "' $selected>" . $row['nama_kelas'] . "</option>";
+             }
             }
             ?>
           </select>
@@ -148,44 +162,27 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
     <!-- Riwayat Upload -->
     <div class="bg-white shadow-md rounded-lg p-6">
       <h3 class="text-xl font-semibold mb-4">Riwayat Upload</h3>
-      <table class="min-w-full bg-white border border-gray-200">
-        <thead>
-          <tr>
-            <th class="border px-4 py-2">No</th>
-            <th class="border px-4 py-2">Judul Materi</th>
-            <th class="border px-4 py-2">Deskripsi</th>
-            <th class="border px-4 py-2">Tingkat</th>
-            <th class="border px-4 py-2">Kelas</th>
-            <th class="border px-4 py-2">Link YouTube</th>
-            <th class="border px-4 py-2">File PDF</th>
-            <th class="border px-4 py-2">Tanggal Upload</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (mysqli_num_rows($result_riwayat) > 0): ?>
-            <?php $no = 1; while ($row = mysqli_fetch_assoc($result_riwayat)): ?>
-              <tr>
-                <td class="border px-4 py-2"><?php echo $no++; ?></td>
-                <td class="border px-4 py-2"><?php echo $row['judul']; ?></td>
-                <td class="border px-4 py-2"><?php echo $row['deskripsi']; ?></td>
-                <td class="border px-4 py-2"><?php echo $row['tingkat']; ?></td>
-                <td class="border px-4 py-2"><?php echo $row['nama_kelas']; ?></td>
-                <td class="border px-4 py-2">
-                  <a href="<?php echo $row['link_yt']; ?>" target="_blank" class="text-blue-600">Lihat Video</a>
-                </td>
-                <td class="border px-4 py-2">
-                  <a href="<?php echo $row['file_path']; ?>" target="_blank" class="text-blue-600">Lihat PDF</a>
-                </td>
-                <td class="border px-4 py-2"><?php echo date('d-m-Y', strtotime($row['tanggal_upload'])); ?></td>
-              </tr>
-            <?php endwhile; ?>
-          <?php else: ?>
-            <tr>
-              <td colspan="8" class="text-center border px-4 py-2">Belum ada riwayat upload.</td>
-            </tr>
-          <?php endif; ?>
-        </tbody>
-      </table>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <?php if (mysqli_num_rows($result_riwayat) > 0): ?>
+          <?php while ($row = mysqli_fetch_assoc($result_riwayat)): ?>
+            <div class="bg-gray-100 rounded-lg shadow p-4">
+              <h4 class="text-lg font-bold mb-2"><?php echo $row['judul']; ?></h4>
+              <p class="text-sm text-gray-700 mb-2">Deskripsi: <?php echo $row['deskripsi']; ?></p>
+              <p class="text-sm text-gray-700 mb-2">Tingkat: <?php echo $row['tingkat']; ?></p>
+              <p class="text-sm text-gray-700 mb-2">Kelas: <?php echo $row['nama_kelas']; ?></p>
+              <p class="text-sm text-gray-700 mb-2">
+                <a href="<?php echo $row['link_yt']; ?>" target="_blank" class="text-blue-600">Lihat Video</a>
+              </p>
+              <p class="text-sm text-gray-700 mb-2">
+                <a href="<?php echo $row['file_path']; ?>" target="_blank" class="text-blue-600">Lihat PDF</a>
+              </p>
+              <p class="text-sm text-gray-500">Tanggal Upload: <?php echo date('d-m-Y', strtotime($row['tanggal_upload'])); ?></p>
+            </div>
+          <?php endwhile; ?>
+        <?php else: ?>
+          <p class="text-center text-gray-700">Belum ada riwayat upload.</p>
+        <?php endif; ?>
+      </div>
     </div>
   </div>
   <?php

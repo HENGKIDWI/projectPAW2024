@@ -29,6 +29,7 @@ function getDaftarMurid($kelas)
 // Fungsi untuk mengambil data pengumpulan tugas
 function getPengumpulan($id_siswa, $id_tugas)
 {
+  echo "script(alert('$id_tugas'))";
   global $conn;
   $query = "SELECT file_tugas, status_pengumpulan FROM pengumpulan_tugas 
             WHERE id_siswa = '$id_siswa' AND id_tugas = '$id_tugas'";
@@ -56,11 +57,27 @@ function hitungPengumpulan($kelas, $tugas)
   return [$sudah_dikumpulkan, $belum_dikumpulkan];
 }
 
-function simpanNilai($id_siswa, $id_tugas, $nilai) {
+// Fungsi untuk menyimpan/memperbarui nilai
+function simpanNilai($id_siswa, $id_tugas, $nilai)
+{
   global $conn;
-  $query = "INSERT INTO penilaian (id_siswa, id_tugas, nilai) 
-            VALUES ('$id_siswa', '$id_tugas', '$nilai') 
-            ON DUPLICATE KEY UPDATE nilai = '$nilai'";
+
+  // Cek apakah sudah ada data pengumpulan
+  $check_query = "SELECT * FROM pengumpulan_tugas 
+                  WHERE id_siswa = '$id_siswa' AND id_tugas = '$id_tugas'";
+  $result = mysqli_query($conn, $check_query);
+
+  if (mysqli_num_rows($result) > 0) {
+    // Update nilai jika data pengumpulan sudah ada
+    $query = "UPDATE pengumpulan_tugas 
+              SET nilai = '$nilai'
+              WHERE id_siswa = '$id_siswa' AND id_tugas = '$id_tugas'";
+  } else {
+    // Insert nilai jika belum ada data pengumpulan
+    $query = "INSERT INTO pengumpulan_tugas (id_siswa, id_tugas, nilai) 
+              VALUES ('$id_siswa', '$id_tugas', '$nilai')";
+  }
+
   return mysqli_query($conn, $query);
 }
 
@@ -70,17 +87,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
   $gagal = 0;
 
   if (isset($_POST['nilai']) && $selected_kelas && $selected_tugas) {
-      foreach ($_POST['nilai'] as $id_siswa => $nilai) {
-          // Validasi input nilai
-          if ($nilai !== '' && is_numeric($nilai) && $nilai >= 0 && $nilai <= 100) {
-              if (simpanNilai($id_siswa, $selected_tugas, $nilai)) {
-                  $berhasil++;
-              } else {
-                  $gagal++;
-              }
-          }
+    foreach ($_POST['nilai'] as $id_siswa => $nilai) {
+      // Validasi input nilai
+      if ($nilai !== '' && is_numeric($nilai) && $nilai >= 0 && $nilai <= 100) {
+        if (simpanNilai($id_siswa, $selected_tugas, $nilai)) {
+          $berhasil++;
+        } else {
+          $gagal++;
+        }
       }
+    }
+
+    // Set session message for feedback
+    $_SESSION['message'] = "Berhasil menyimpan $berhasil nilai" . ($gagal > 0 ? ", gagal menyimpan $gagal nilai" : "");
   }
+
+  header("Location: input_nilai.php");
+  exit();
 }
 
 // Variabel
@@ -103,16 +126,19 @@ if ($selected_kelas && $selected_tugas) {
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* Custom scrollbar  */
-    ::-webkit-scrollbar { 
+    ::-webkit-scrollbar {
       width: 8px;
     }
+
     ::-webkit-scrollbar-track {
       background: #f1f1f1;
     }
+
     ::-webkit-scrollbar-thumb {
       background: #888;
       border-radius: 4px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
@@ -137,12 +163,12 @@ if ($selected_kelas && $selected_tugas) {
         <!-- Form Pilihan Kelas dan Tugas -->
         <div class="md:col-span-1 bg-white shadow-xl rounded-lg p-6 border-t-4 border-blue-500">
           <h3 class="text-xl font-semibold mb-6 text-gray-700">Pilih Kelas dan Tugas</h3>
-          
+
           <!-- Form Pilih Kelas dan Tugas -->
           <form method="POST" class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Kelas:</label>
-              <select name="kelas" onchange="this.form.submit()" 
+              <select name="kelas" onchange="this.form.submit()"
                 class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
                 transition duration-200 ease-in-out">
@@ -160,7 +186,7 @@ if ($selected_kelas && $selected_tugas) {
             <?php if ($selected_kelas): ?>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Tugas:</label>
-                <select name="tugas" onchange="this.form.submit()" 
+                <select name="tugas" onchange="this.form.submit()"
                   class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
                   transition duration-200 ease-in-out">
@@ -176,18 +202,23 @@ if ($selected_kelas && $selected_tugas) {
               </div>
             <?php endif; ?>
           </form>
-
-          <!-- Informasi Pengumpulan -->
-          <?php if ($selected_kelas && $selected_tugas): ?>
-            <div class="mt-6 flex justify-between text-sm">
-              <span class="text-green-600 font-semibold">
-                Sudah Dikumpulkan: <?= $sudah_dikumpulkan; ?> siswa
-              </span>
-              <span class="text-red-600 font-semibold">
-                Belum Dikumpulkan: <?= $belum_dikumpulkan; ?> siswa
-              </span>
-            </div>
-          <?php endif; ?>
+          
+          <form method="POST">
+            <input type="hidden" name="guru_id" value="<?= $guru_id; ?>">
+            <input type="hidden" name="kelas" value="<?= $selected_kelas; ?>">
+            <input type="hidden" name="tugas" value="<?= $selected_tugas; ?>">
+            <input type="hidden" name="simpan_nilai" value="true">
+            <!-- Informasi Pengumpulan -->
+            <?php if ($selected_kelas && $selected_tugas): ?>
+              <div class="mt-6 flex justify-between text-sm">
+                <span class="text-green-600 font-semibold">
+                  Sudah Dikumpulkan: <?= $sudah_dikumpulkan; ?> siswa
+                </span>
+                <span class="text-red-600 font-semibold">
+                  Belum Dikumpulkan: <?= $belum_dikumpulkan; ?> siswa
+                </span>
+              </div>
+            <?php endif; ?>
         </div>
 
         <!-- Tabel Daftar Siswa -->
@@ -243,11 +274,13 @@ if ($selected_kelas && $selected_tugas) {
                 </tbody>
               </table>
               <div class="text-right mt-6">
-                    <button type="submit" 
-                        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-300">
-                        Save
-                    </button>
-                </div>
+                <button type="submit"
+                  name="simpan_nilai"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-300">
+                  Simpan
+                </button>
+              </div>
+              </form>
             </div>
           <?php endif; ?>
         </div>

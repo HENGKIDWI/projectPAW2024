@@ -2,6 +2,14 @@
 include "../../koneksi.php";
 session_start();
 
+// Fungsi untuk mengambil daftar kelas untuk percabanagan
+function getDaftarKelasPercabangan($id_kelas)
+{
+  global $conn;
+  $query = "SELECT tingkat, nama_kelas FROM kelas WHERE id_kelas = '$id_kelas'";
+  return mysqli_query($conn, $query);
+}
+
 // Fungsi untuk mengambil daftar kelas yang diajar guru
 function getDaftarKelas($guru_id)
 {
@@ -79,7 +87,7 @@ function getRiwayatPelanggaran()
         JOIN kelas k ON p.id_kelas = k.id_kelas
         LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru
         ORDER BY p.tanggal_pelanggaran DESC";
-        
+
   $result = mysqli_query($conn, $query);
 
   if (!$result) {
@@ -151,7 +159,7 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
               while ($row = mysqli_fetch_assoc($kelas_list)) {
                 $selected = ($selected_kelas == $row['id_kelas']) ? 'selected' : '';
                 echo "<option value='" . $row['id_kelas'] . "' $selected>" . $row["tingkat"] . " " . $row["nama_kelas"] . "</option>";
-              }              
+              }
               ?>
             </select>
           </div>
@@ -213,15 +221,39 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
             $riwayat = getRiwayatPelanggaran();
             $no = 1;
             while ($row = mysqli_fetch_assoc($riwayat)) {
-              echo "<tr>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . '' . $row['tingkat'] . "</td>"; // tingkat tidak dipakai jika sudah bergabung di nama_kelas
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";
-              echo "</tr>";
+              // Jika ada kelas yang dipilih, filter berdasarkan kelas tersebut
+              if (!empty($_POST['kelas'])) {
+                $selected_kelas = $_POST['kelas'];
+                $kelas_result = getDaftarKelasPercabangan($selected_kelas);
+                $kelas_data = mysqli_fetch_assoc($kelas_result);
+
+                // Bandingkan dengan format yang sama (tingkat + nama_kelas)
+                $selected_kelas_name = $kelas_data['tingkat'] . ' ' . $kelas_data['nama_kelas'];
+
+                // Hanya tampilkan jika kelas sesuai
+                if ($row['nama_kelas'] === $selected_kelas_name) {
+                  echo "<tr>";
+                  echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
+                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
+                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
+                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
+                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
+                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
+                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";
+                  echo "</tr>";
+                }
+              } else {
+                // Jika tidak ada kelas yang dipilih, tampilkan semua data
+                echo "<tr>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";
+                echo "</tr>";
+              }
             }
             ?>
           </tbody>
