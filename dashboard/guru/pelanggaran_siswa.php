@@ -77,6 +77,7 @@ function getRiwayatPelanggaran()
             IFNULL(g.nama_lengkap, 'Tidak Ada Guru Wali') AS nama_guru_wali,
             p.poin AS poin_terbaru,
             p.tanggal_pelanggaran,
+            p.deskripsi,
             (
                 SELECT SUM(p2.poin) 
                 FROM pelanggaran p2
@@ -164,7 +165,6 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
             </select>
           </div>
 
-          <?php if ($selected_kelas): ?>
             <div class="mb-4">
               <label for="siswa" class="block text-sm font-semibold mb-2">Siswa</label>
               <select id="siswa" name="siswa" class="w-full p-2 border border-gray-300 rounded" required>
@@ -196,13 +196,30 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
             <div class="text-right">
               <button type="submit" name="simpan_pelanggaran" class="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700">Simpan Pelanggaran</button>
             </div>
-          <?php endif; ?>
         </form>
       </div>
 
       <!-- Riwayat Pelanggaran (Right Side) -->
       <div class="w-2/3 bg-white shadow-md rounded-lg p-6">
-        <h2 class="text-2xl font-bold text-center mb-6">Riwayat Pelanggaran</h2>
+        <h2 class="text-2xl font-bold text-center mb-6">Daftar Pelanggaran</h2>
+
+        <!-- filter -->
+        <form action="" method="POST">
+          <div class="mb-4">  
+            <label for="kelas" class="block text-sm font-semibold mb-2">Kelas</label>
+            <select id="kelas" name="kelas" class="w-full p-2 border border-gray-300 rounded" required onchange="this.form.submit()">
+              <option value="">Pilih Kelas</option>
+              <?php
+              $kelas_list = getDaftarKelas($_SESSION['guru_id']);
+              while ($row = mysqli_fetch_assoc($kelas_list)) {
+                $selected = ($selected_kelas == $row['id_kelas']) ? 'selected' : '';
+                echo "<option value='" . $row['id_kelas'] . "' $selected>" . $row["tingkat"] . " " . $row["nama_kelas"] . "</option>";
+              }
+              ?>
+            </select>
+          </div>
+          </form>
+
 
         <table class="table-auto w-full text-left border-collapse border border-gray-300">
           <thead>
@@ -211,6 +228,7 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Kelas</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Siswa</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Guru Wali</th>
+              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Deskripsi</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Poin</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Tanggal</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Total Poin</th>
@@ -237,6 +255,7 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
                   echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
                   echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
                   echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
+                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['deskripsi'] . "</td>";
                   echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
                   echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
                   echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";

@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<nav class="bg-white shadow-md">
+<nav class="bg-white shadow-md " id="header">
   <div class="container mx-auto px-4 py-2 flex justify-between items-center">
     <!-- Logo dan Nama Sekolah -->
     <div class="flex items-center space-x-4">

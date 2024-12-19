@@ -2,250 +2,130 @@
 include "../../koneksi.php";
 session_start();
 
-
-// Function to get list of classes
-function getDaftarKelas() {
+// Function to get bank soal data
+function getBankSoal()
+{
     global $conn;
-    $query = "SELECT DISTINCT tingkat FROM kelas ORDER BY tingkat ASC" ;
-    return mysqli_query($conn, $query);
-}
-
-// Function to get list of subjects
-function getDaftarMapel() {
-    global $conn;
-    $query = "SELECT * FROM mata_pelajaran";
-    return mysqli_query($conn, $query);
-}
-
-// Process form if submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Validate input
-    $judul = mysqli_real_escape_string($conn, $_POST['judul']);
-    $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi']);
-    $kelas_id = mysqli_real_escape_string($conn, $_POST['kelas']);
-    $mapel_id = mysqli_real_escape_string($conn, $_POST['mata_pelajaran']);
-    
-    // Process file upload for question (optional)
-    $file_soal = null;
-    if (!empty($_FILES['file_soal']['name'])) {
-        $target_dir = "uploads/soal/";
-        if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        
-        $file_name_soal = uniqid() . '_' . basename($_FILES['file_soal']['name']);
-        $target_file_soal = $target_dir . $file_name_soal;
-        
-        if (move_uploaded_file($_FILES['file_soal']['tmp_name'], $target_file_soal)) {
-            $file_soal = $file_name_soal;
-        } else {
-            $error_message = "Maaf, terjadi kesalahan saat upload file soal.";
-        }
-    }
-    
-    // Process file upload for answer (optional)
-    $file_jawaban = null;
-    if (!empty($_FILES['file_jawaban']['name'])) {
-        $target_dir = "uploads/jawaban/";
-        if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        
-        $file_name_jawaban = uniqid() . '_' . basename($_FILES['file_jawaban']['name']);
-        $target_file_jawaban = $target_dir . $file_name_jawaban;
-        
-        if (move_uploaded_file($_FILES['file_jawaban']['tmp_name'], $target_file_jawaban)) {
-            $file_jawaban = $file_name_jawaban;
-        } else {
-            $error_message = "Maaf, terjadi kesalahan saat upload file jawaban.";
-        }
-    }
-    
-    // Question URL (optional)
-    $url_soal = !empty($_POST['url_soal']) ? mysqli_real_escape_string($conn, $_POST['url_soal']) : null;
-    
-    // Answer URL (optional)
-    $url_jawaban = !empty($_POST['url_jawaban']) ? mysqli_real_escape_string($conn, $_POST['url_jawaban']) : null;
-    
-    // Insert query for task
-    $query = "INSERT INTO bank_soal (
-        judul_bank_soal, 
-        detail_bank_soal, 
-        mata_pelajaran,
-        kelas, 
-        file_soal, 
-        file_jawaban,
-        url_soal, 
-        url_jawaban
-    ) VALUES (
-        '$judul', 
-        '$deskripsi', 
-        '$mapel_id',
-        '$kelas_id', 
-        " . ($file_soal ? "'$file_soal'" : "NULL") . ", 
-        " . ($file_jawaban ? "'$file_jawaban'" : "NULL") . ", 
-        " . ($url_soal ? "'$url_soal'" : "NULL") . ", 
-        " . ($url_jawaban ? "'$url_jawaban'" : "NULL") . "
-    )";
-    
-    if (mysqli_query($conn, $query)) {
-        $success_message = "Tugas berhasil ditambahkan!";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();    
-    } else {
-        $error_message = "Error: " . mysqli_error($conn);
-    }
+    $query = "SELECT * FROM bank_soal ORDER BY id ASC";
+    $result = mysqli_query($conn, $query);
+    return $result ? $result : null;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Bank Soal</title>
+    <title>Bank Soal</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800">
+
+<body class="bg-gray-50">
     <!-- Sidebar -->
     <?php include '../../layout/sidebar.php'; ?>
-    
-    <!-- Navbar -->
-    <header id="header" class="bg-blue-600 text-white py-4 transition-all duration-300">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md py-4">
         <?php include '../../layout/header.php'; ?>
     </header>
 
     <!-- Main Content -->
-    <div class="container mx-auto mt-8 px-4">
-        <h2 class="text-2xl font-bold text-center mb-6">Input Bank Soal</h2>
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Bank Soal</h1>
+                <a href="input_bank_soal.php" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                    Tambah Soal
+                </a>
 
-        <?php 
-        // Display success or error message
-        if (isset($success_message)) {
-            echo "<div class='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4' role='alert'>$success_message</div>";
-        }
-        if (isset($error_message)) {
-            echo "<div class='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4' role='alert'>$error_message</div>";
-        }
-        ?>
+            </div>
 
-        <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl mx-auto">
-            <form action="" method="POST" enctype="multipart/form-data">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Left Column: Basic Task Information -->
-                    <div class="space-y-4">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">Bank Soal Information</h3>
-                        
-                        <!-- Task Title -->
-                        <div>
-                            <label for="judul" class="block text-gray-700 font-bold mb-2">Task Title</label>
-                            <input type="text" id="judul" name="judul" required 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter task title">
-                        </div>
-
-                        <!-- Task Description -->
-                        <div>
-                            <label for="deskripsi" class="block text-gray-700 font-bold mb-2">Task Description</label>
-                            <textarea id="deskripsi" name="deskripsi" rows="4" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Explain task details"></textarea>
-                        </div>
-
-                        <!-- Subject -->
-                        <div>
-                            <label for="mata_pelajaran" class="block text-gray-700 font-bold mb-2">Select Subject</label>
-                            <select id="mata_pelajaran" name="mata_pelajaran" required 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select Subject</option>
-                                <?php 
-                                $mapel_list = getDaftarMapel();
-                                while ($row = mysqli_fetch_assoc($mapel_list)) {
-                                    echo "<option value='" . $row['nama_pelajaran'] . "'>" . $row['nama_pelajaran'] . "</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-
-                        <!-- Class -->
-                        <div>
-                            <label for="kelas" class="block text-gray-700 font-bold mb-2">Select Class</label>
-                            <select id="kelas" name="kelas" required 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select Class</option>
-                                <?php 
-                                $kelas_list = getDaftarKelas();
-                                while ($row = mysqli_fetch_assoc($kelas_list)) {
-                                    echo "<option value='" . $row['tingkat'] . "'>" . $row['tingkat'] ."</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-
-                        <!-- Task Points -->
-                        <!-- <div>
-                            <label for="poin" class="block text-gray-700 font-bold mb-2">Task Points</label>
-                            <input type="number" id="poin" name="poin" required min="0" max="100"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter task points">
-                        </div> -->
-
-                        <!-- Deadline -->
-                        <!-- <div>
-                            <label for="deadline" class="block text-gray-700 font-bold mb-2">Task Deadline</label>
-                            <input type="datetime-local" id="deadline" name="deadline" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div> -->
-                    </div>
-
-                    <!-- Right Column: File and URL Upload -->
-                    <div class="space-y-4">
-                        <h3 class="text-xl font-semibold text-blue-600 mb-4">Documents</h3>
-                        
-                        <!-- Question File (Optional) -->
-                        <div>
-                            <label for="file_soal" class="block text-gray-700 font-bold mb-2">Question File (Optional)</label>
-                            <input type="file" id="file_soal" name="file_soal" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-
-                        <!-- Question URL (Optional) -->
-                        <div>
-                            <label for="url_soal" class="block text-gray-700 font-bold mb-2">Question URL (Optional)</label>
-                            <input type="url" id="url_soal" name="url_soal" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="https://example.com/question">
-                        </div>
-
-                        <!-- Answer File (Optional) -->
-                        <div>
-                            <label for="file_jawaban" class="block text-gray-700 font-bold mb-2">Answer File (Optional)</label>
-                            <input type="file" id="file_jawaban" name="file_jawaban" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-
-                        <!-- Answer URL (Optional) -->
-                        <div>
-                            <label for="url_jawaban" class="block text-gray-700 font-bold mb-2">Answer URL (Optional)</label>
-                            <input type="url" id="url_jawaban" name="url_jawaban" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="https://example.com/answer">
-                        </div>
-                    </div>
+            <!-- Search and Filter Section -->
+            <div class="mb-6 flex gap-4">
+                <div class="flex-1">
+                    <input type="text"
+                        placeholder="Cari soal..."
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
+                <select class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Mata Pelajaran</option>
+                    <option value="Matematika">Matematika</option>
+                    <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                    <option value="Fisika">Fisika</option>
+                </select>
+                <select class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Kelas</option>
+                    <option value="7">Kelas 7</option>
+                    <option value="8">Kelas 8</option>
+                    <option value="9">Kelas 9</option>
+                </select>
+            </div>
 
-                <!-- Submit Button -->
-                <div class="text-right mt-6">
-                    <button type="submit" 
-                        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-300">
-                        Save
-                    </button>
+            <!-- Table Section -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul Bank Soal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detail</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mata Pelajaran</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Soal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Jawaban</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <?php
+                            $bank_soal = getBankSoal();
+                            if ($bank_soal) {
+                                while ($row = mysqli_fetch_assoc($bank_soal)) {
+                                    echo "<tr class='hover:bg-gray-50'>";
+                                    echo "<td class='px-6 py-4 whitespace-nowrap'>{$row['id']}</td>";
+                                    echo "<td class='px-6 py-4 whitespace-nowrap'>{$row['judul_bank_soal']}</td>";
+                                    echo "<td class='px-6 py-4'>{$row['detail_bank_soal']}</td>";
+                                    echo "<td class='px-6 py-4'>{$row['mata_pelajaran']}</td>";
+                                    echo "<td class='px-6 py-4'>{$row['kelas']}</td>";
+                                    echo "<td class='px-6 py-4'>" . ($row['file_soal'] ? $row['file_soal'] : '-') . "</td>";
+                                    echo "<td class='px-6 py-4'>" . ($row['file_jawaban'] ? $row['file_jawaban'] : '-') . "</td>";
+                                    echo "<td class='px-6 py-4'>";
+                                    echo "<div class='flex space-x-2'>";
+                                    echo "<button class='text-blue-600 hover:text-blue-800'>Edit</button>";
+                                    echo "<button class='text-red-600 hover:text-red-800'>Hapus</button>";
+                                    echo "</div>";
+                                    echo "</td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='8' class='px-6 py-4 text-center'>Tidak ada data</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
-            </form>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-6 flex justify-between items-center">
+                <div class="text-sm text-gray-700">
+                    Menampilkan 1 - 10 dari 20 data
+                </div>
+                <div class="flex space-x-2">
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Previous</button>
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">1</button>
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">2</button>
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Next</button>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <?php
-    require_once "../../layout/footer.php"
-    ?>
+    <!-- Footer -->
+    <?php include '../../layout/footer.php'; ?>
 </body>
+
 </html>

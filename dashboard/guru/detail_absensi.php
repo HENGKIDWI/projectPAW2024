@@ -88,6 +88,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["update_absensi"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Murid</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Tambahkan style cetak */
+        @media print {
+            body * {
+                visibility: hidden; /* Sembunyikan semua elemen */
+            }
+            .printable-area, #printable-area * {
+                visibility: visible; /* Tampilkan elemen tertentu */
+            }
+            #cetak,#kembali,#perbarui{
+                display: none !important;
+            }
+            .printable-area {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 text-gray-800">
@@ -99,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["update_absensi"])) {
     <div class="container mx-auto mt-8 px-4">
         <h2 class="text-2xl font-bold text-center mb-6">Daftar Murid</h2>
 
-        <div class="bg-white shadow-md rounded-lg p-6">
+        <div class="bg-white shadow-md rounded-lg p-6" id="printable-area">
             <?php if ($kelas_id && $mata_pelajaran_id): ?>
                 <h3 class="text-xl font-semibold mb-4">Kelas = <?= $kelas_id ?></h3>
                 <h3 class="text-xl font-semibold mb-4">Mata pelajaran = <?= $mata_pelajaran_id ?></h3>
@@ -155,8 +174,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["update_absensi"])) {
                     </table>
 
                     <div class="mt-4 flex justify-end gap-4">
-                        <a href="input_absen.php" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Kembali</a>
-                        <button type="submit" name="update_absensi" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Perbarui Absensi</button>
+                        <a href="input_absen.php" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500" id="kembali">Kembali</a>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 "id='cetak' onclick="window.print()">Cetak</button>
+                        <button type="submit" name="update_absensi" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" id="perbarui">Perbarui Absensi</button>
                     </div>
                 </form>
             <?php else: ?>
