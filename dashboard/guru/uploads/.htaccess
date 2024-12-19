@@ -1,0 +1,3 @@
+<FilesMatch "\.(htm|html)$">
+    Header unset Content-Disposition
+</FilesMatch>

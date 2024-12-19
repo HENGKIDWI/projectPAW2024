@@ -11,24 +11,11 @@ $nama_guru = $_SESSION['guru_id'];
 
 // Fungsi untuk mendapatkan tingkat kelas
 function getTingkatKelas(){
-  global $conn;
-  $query = "SELECT DISTINCT tingkat FROM kelas";
-  $tingkat = mysqli_query($conn, $query);
-  return $tingkat;
+    global $conn;
+    $query = "SELECT DISTINCT tingkat FROM kelas";
+    $tingkat = mysqli_query($conn, $query);
+    return $tingkat;
 }
-
-// Fungsi untuk mendapatkan daftar kelas berdasarkan tingkat
-function getKelas($tingkat){
-  global $conn;
-  if (isset($_POST['tingkat_kelas'])){
-    $query = "SELECT id_kelas, nama_kelas FROM kelas WHERE tingkat = '$tingkat' ORDER BY nama_kelas ASC";
-    $kelas = mysqli_query($conn, $query);
-    return $kelas;
-  }
-}
-
-$selectTingkat = isset($_POST['tingkat_kelas']) ? $_POST['tingkat_kelas'] : '';
-$selectKelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
 
 // Proses untuk menyimpan data ke database
 if (isset($_POST["kirim"])) {
@@ -94,6 +81,7 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upload Materi Belajar</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body class="bg-gray-100">
   <!-- Sidebar -->
@@ -121,13 +109,12 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
         </div>
         <div class="mb-4">
           <label for="tingkat_kelas" class="block text-sm font-medium text-gray-700">Tingkat Kelas</label>
-          <select id="tingkat_kelas" name="tingkat_kelas" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required onchange="this.form.submit()">
+          <select id="tingkat_kelas" name="tingkat_kelas" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
             <option value="">-- Pilih Tingkat --</option>
             <?php 
             $tingkat_list = getTingkatKelas();
             while ($row = mysqli_fetch_assoc($tingkat_list)) {
-                $selected = ($selectTingkat == $row['tingkat']) ? 'selected' : '';
-                echo "<option value='" . $row['tingkat'] . "' $selected>" . $row['tingkat'] . "</option>";
+                echo "<option value='" . $row['tingkat'] . "'>" . $row['tingkat'] . "</option>";
             }
             ?>
           </select>
@@ -136,57 +123,43 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
           <label for="kelas" class="block text-sm font-medium text-gray-700">Kelas</label>
           <select id="kelas" name="kelas" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
             <option value="">-- Pilih Kelas --</option>
-            <?php
-            if (!empty($selectTingkat)){
-              $kelas_list = getKelas($selectTingkat);
-              while ($row = mysqli_fetch_assoc($kelas_list)) {
-                $selected = ($selectKelas == $row['id_kelas']) ? 'selected' : '';
-                echo "<option value='" . $row['id_kelas'] . "' $selected>" . $row['nama_kelas'] . "</option>";
-             }
-            }
-            ?>
           </select>
         </div>
         <div class="mb-4">
           <label for="link_yt" class="block text-sm font-medium text-gray-700">Link YouTube</label>
-          <input type="url" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" id="link_yt" name="link_yt" placeholder="https://youtube.com/example" required>
+          <input type="url" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" id="link_yt" name="link_yt" placeholder="https://youtube.com/example (opsional)">
         </div>
         <div class="mb-4">
           <label for="file_pdf" class="block text-sm font-medium text-gray-700">File PDF</label>
-          <input type="file" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" id="file_pdf" name="file_pdf" accept="application/pdf" required>
+          <input type="file" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" id="file_pdf" name="file_pdf" accept="application/pdf (opsional)">
         </div>
         <button type="submit" name="kirim" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md">Upload Materi</button>
       </form>
     </div>
-
-    <!-- Riwayat Upload -->
-    <div class="bg-white shadow-md rounded-lg p-6">
-      <h3 class="text-xl font-semibold mb-4">Riwayat Upload</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <?php if (mysqli_num_rows($result_riwayat) > 0): ?>
-          <?php while ($row = mysqli_fetch_assoc($result_riwayat)): ?>
-            <div class="bg-gray-100 rounded-lg shadow p-4">
-              <h4 class="text-lg font-bold mb-2"><?php echo $row['judul']; ?></h4>
-              <p class="text-sm text-gray-700 mb-2">Deskripsi: <?php echo $row['deskripsi']; ?></p>
-              <p class="text-sm text-gray-700 mb-2">Tingkat: <?php echo $row['tingkat']; ?></p>
-              <p class="text-sm text-gray-700 mb-2">Kelas: <?php echo $row['nama_kelas']; ?></p>
-              <p class="text-sm text-gray-700 mb-2">
-                <a href="<?php echo $row['link_yt']; ?>" target="_blank" class="text-blue-600">Lihat Video</a>
-              </p>
-              <p class="text-sm text-gray-700 mb-2">
-                <a href="<?php echo $row['file_path']; ?>" target="_blank" class="text-blue-600">Lihat PDF</a>
-              </p>
-              <p class="text-sm text-gray-500">Tanggal Upload: <?php echo date('d-m-Y', strtotime($row['tanggal_upload'])); ?></p>
-            </div>
-          <?php endwhile; ?>
-        <?php else: ?>
-          <p class="text-center text-gray-700">Belum ada riwayat upload.</p>
-        <?php endif; ?>
-      </div>
-    </div>
   </div>
-  <?php
-    require_once "../../layout/footer.php"
-  ?>
+
+  <!-- Script AJAX -->
+  <script>
+    $(document).ready(function () {
+      $("#tingkat_kelas").change(function () {
+        var tingkat = $(this).val();
+        if (tingkat) {
+          $.ajax({
+            url: "get_kelas.php",
+            type: "POST",
+            data: { tingkat: tingkat },
+            success: function (data) {
+              $("#kelas").html(data);
+            },
+            error: function () {
+              alert("Gagal memuat data kelas.");
+            },
+          });
+        } else {
+          $("#kelas").html('<option value="">-- Pilih Kelas --</option>');
+        }
+      });
+    });
+  </script>
 </body>
 </html>

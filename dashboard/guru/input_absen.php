@@ -2,6 +2,14 @@
 include "../../koneksi.php";
 session_start();
 
+// Fungsi untuk mengambil daftar kelas untuk percabanagan
+function getDaftarKelasPercabangan($id_kelas)
+{
+  global $conn;
+  $query = "SELECT tingkat, nama_kelas FROM kelas WHERE id_kelas = '$id_kelas'";
+  return mysqli_query($conn, $query);
+}
+
 // Improved error handling function
 function handleDatabaseError($conn, $query = null)
 {

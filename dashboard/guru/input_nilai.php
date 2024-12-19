@@ -3,11 +3,15 @@ include "../../koneksi.php";
 session_start();
 
 // Fungsi untuk mengambil daftar kelas
-function getDaftarKelas()
+function getDaftarKelas($guru_id)
 {
   global $conn;
-  $query = "SELECT * FROM kelas";
+  $guru_id = mysqli_real_escape_string($conn, $guru_id);
+  $query = "SELECT DISTINCT kelas.* FROM kelas 
+              JOIN jadwal ON kelas.id_kelas = jadwal.kelas_id 
+              WHERE jadwal.guru_id = '$guru_id'";
   return mysqli_query($conn, $query);
+
 }
 
 // Fungsi untuk mengambil daftar tugas berdasarkan kelas
@@ -86,7 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
   $berhasil = 0;
   $gagal = 0;
 
-  if (isset($_POST['nilai']) && $selected_kelas && $selected_tugas) {
+  // Ambil nilai kelas dan tugas yang dipilih
+  $selected_kelas = $_POST['kelas'];
+  $selected_tugas = $_POST['tugas'];
+
+  if (isset($_POST['nilai'])) {
     foreach ($_POST['nilai'] as $id_siswa => $nilai) {
       // Validasi input nilai
       if ($nilai !== '' && is_numeric($nilai) && $nilai >= 0 && $nilai <= 100) {
@@ -106,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
   exit();
 }
 
+
 // Variabel
 $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
 $selected_tugas = isset($_POST['tugas']) ? $_POST['tugas'] : '';
@@ -115,6 +124,9 @@ $belum_dikumpulkan = 0;
 if ($selected_kelas && $selected_tugas) {
   list($sudah_dikumpulkan, $belum_dikumpulkan) = hitungPengumpulan($selected_kelas, $selected_tugas);
 }
+
+$guru_id = $_SESSION['guru_id'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -174,7 +186,7 @@ if ($selected_kelas && $selected_tugas) {
                 transition duration-200 ease-in-out">
                 <option value="">Pilih Kelas</option>
                 <?php
-                $kelas_list = getDaftarKelas();
+                $kelas_list = getDaftarKelas($guru_id);
                 while ($row = mysqli_fetch_assoc($kelas_list)) {
                   $selected = ($selected_kelas == $row['id_kelas']) ? 'selected' : '';
                   echo "<option value='{$row['id_kelas']}' $selected>{$row['tingkat']} {$row['nama_kelas']}</option>";
@@ -202,7 +214,7 @@ if ($selected_kelas && $selected_tugas) {
               </div>
             <?php endif; ?>
           </form>
-          
+
           <form method="POST">
             <input type="hidden" name="guru_id" value="<?= $guru_id; ?>">
             <input type="hidden" name="kelas" value="<?= $selected_kelas; ?>">
@@ -247,8 +259,13 @@ if ($selected_kelas && $selected_tugas) {
 
                     if ($pengumpulan && $row = mysqli_fetch_assoc($pengumpulan)) {
                       $status = $row['status_pengumpulan'];
-                      $file_tugas = "<a href='uploads/{$row['file_tugas']}' class='text-blue-600 hover:text-blue-800 transition duration-200' target='_blank'>Lihat</a>";
+                      if (!empty($row['file_tugas'])) {
+                        $file_tugas = "<a href='uploads/{$row['file_tugas']}' class='text-blue-600 hover:text-blue-800' target='_blank'>Lihat</a>";
+                      } else {
+                        $file_tugas = "-";
+                      }
                     }
+
 
                     $statusColor = $status == 'Sudah Dikumpulkan' ? 'text-green-600' : 'text-red-600';
 

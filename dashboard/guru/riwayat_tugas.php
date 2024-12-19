@@ -3,60 +3,64 @@ include "../../koneksi.php";
 session_start();
 
 // Function to fetch task list with improved error handling and query
-function getRiwayatTugas() {
+function getRiwayatTugas()
+{
     global $conn;
-    
+
     // Improved query to join with kelas table if needed
     $query = "SELECT t.*, k.nama_kelas, k.tingkat 
               FROM tugas t
               LEFT JOIN kelas k ON t.kelas_id = k.id_kelas
               ORDER BY t.deadline DESC";
-    
+
     $result = mysqli_query($conn, $query);
-    
+
     if (!$result) {
         // Log error or handle query failure
         error_log("Query failed: " . mysqli_error($conn));
         return false;
     }
-    
+
     return $result;
 }
 
 // Function to safely display file link or name
-function displayFileTugas($filePath) {
+function displayFileTugas($filePath)
+{
     if (empty($filePath)) {
         return "Tidak ada file";
     }
-    
+
     // Check file extension and provide appropriate display/download link
     $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
     $allowedExtensions = ['pdf', 'docx', 'txt', 'xlsx'];
-    
+
     if (in_array($fileExtension, $allowedExtensions)) {
-        return "<a href='../../uploads/tugas/" . htmlspecialchars($filePath) . "' 
+        return "<a href='./uploads/tugas/" . htmlspecialchars($filePath) . "' 
                    class='text-blue-600 hover:underline' 
                    target='_blank' 
-                   download>
+                   >
                    " . htmlspecialchars($filePath) . "
                 </a>";
     }
-    
+
     return htmlspecialchars($filePath);
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Tugas Guru</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 text-gray-800">
     <!-- Sidebar -->
     <?php include '../../layout/sidebar.php'; ?>
-    
+
     <!-- Navbar -->
     <header id="header" class="bg-blue-600 text-white py-4 transition-all duration-300">
         <?php include '../../layout/header.php'; ?>
@@ -90,25 +94,30 @@ function displayFileTugas($filePath) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
+                    <?php
                     $riwayat_tugas = getRiwayatTugas();
-                    
+
                     if ($riwayat_tugas && mysqli_num_rows($riwayat_tugas) > 0) {
                         $no = 1;
                         while ($row = mysqli_fetch_assoc($riwayat_tugas)) {
-                            $kelas_info = !empty($row['tingkat']) && !empty($row['nama_kelas']) 
-                                ? $row['tingkat'] . " - " . $row['nama_kelas'] 
+                            $kelas_info = !empty($row['tingkat']) && !empty($row['nama_kelas'])
+                                ? $row['tingkat'] . " - " . $row['nama_kelas']
                                 : "Tidak ditentukan";
-                            
+
                             echo "<tr>";
                             echo "<td class='py-2 px-4 border text-center'>" . $no++ . "</td>";
                             echo "<td class='py-2 px-4 border'>" . htmlspecialchars($row['judul']) . "</td>";
                             echo "<td class='py-2 px-4 border'>" . displayFileTugas($row['file_tugas']) . "</td>";
-                            echo "<td class='py-2 px-4 border'>" . 
-                                 (!empty($row['url_tugas']) 
-                                     ? "<a href='" . htmlspecialchars($row['url_tugas']) . "' target='_blank' class='text-blue-600 hover:underline'>Lihat URL</a>" 
-                                     : "Tidak ada URL") . 
-                                 "</td>";
+                            echo "<td class='py-2 px-4 border'>" .
+                                (!empty($row['url_tugas'])
+                                    ? "<a href='" . htmlspecialchars($row['url_tugas']) . "' 
+                                        target='_blank' 
+                                        class='text-blue-600 hover:underline'>
+                                        Lihat URL
+                                    </a>"
+                                    : "Tidak ada URL") .
+                                "</td>";
+
                             echo "<td class='py-2 px-4 border text-center'>" . htmlspecialchars($row['poin']) . "</td>";
                             echo "<td class='py-2 px-4 border text-center'>" . htmlspecialchars($kelas_info) . "</td>";
                             echo "<td class='py-2 px-4 border'>" . htmlspecialchars($row['deadline']) . "</td>";
@@ -127,4 +136,5 @@ function displayFileTugas($filePath) {
     require_once "../../layout/footer.php"
     ?>
 </body>
+
 </html>

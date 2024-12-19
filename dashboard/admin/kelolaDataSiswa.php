@@ -92,7 +92,7 @@ $result_kelas = mysqli_query($conn, $query_kelas);
     <?php include '../../layout/sidebar.php'; ?>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col fixeed ">
         <!-- Navbar -->
         <header class="bg-blue-600 text-white py-4 shadow-md">
             <?php include '../../layout/header.php'; ?>
@@ -153,7 +153,7 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                     <div class="flex space-x-4">
                         <input type="text" name="nama_siswa" placeholder="Cari Nama Siswa" class="px-4 py-2 rounded-md border border-gray-300" value="<?php echo isset($_GET['nama_siswa']) ? $_GET['nama_siswa'] : ''; ?>" />
 
-                        <input type="text" name="nis_siswa" placeholder="Cari NIS Siswa" class="px-4 py-2 rounded-md border border-gray-300" value="<?php echo isset($_GET['nis_siswa']) ? $_GET['nis_siswa'] : ''; ?>" />
+                        <input type="text" name="nis_siswa" placeholder="Cari NISN Siswa" class="px-4 py-2 rounded-md border border-gray-300" value="<?php echo isset($_GET['nis_siswa']) ? $_GET['nis_siswa'] : ''; ?>" />
 
                         <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-md">Filter</button>
                     </div>
@@ -169,7 +169,7 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                     <thead>
                         <tr class="bg-blue-600 text-white">
                             <th class="py-3 px-4 text-left">ID</th>
-                            <th class="py-3 px-4 text-left">NIS</th>
+                            <th class="py-3 px-4 text-left">NISN</th>
                             <th class="py-3 px-4 text-left">Nama Lengkap</th>
                             <th class="py-3 px-4 text-left">Kelas</th>
                             <th class="py-3 px-4 text-left">Alamat</th>

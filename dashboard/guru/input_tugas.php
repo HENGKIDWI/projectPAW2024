@@ -3,10 +3,15 @@ include "../../koneksi.php";
 session_start();
 
 // Fungsi untuk mengambil daftar kelas
-function getDaftarKelas() {
-    global $conn;
-    $query = "SELECT * FROM kelas";
-    return mysqli_query($conn, $query);
+function getDaftarKelas($guru_id)
+{
+  global $conn;
+  $guru_id = mysqli_real_escape_string($conn, $guru_id);
+  $query = "SELECT DISTINCT kelas.* FROM kelas 
+              JOIN jadwal ON kelas.id_kelas = jadwal.kelas_id 
+              WHERE jadwal.guru_id = '$guru_id'";
+  return mysqli_query($conn, $query);
+
 }
 
 // Proses form jika disubmit
@@ -60,14 +65,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if (mysqli_query($conn, $query)) {
         $success_message = "Tugas berhasil ditambahkan!";
-        header("Location: " . $_SERVER['PHP_SELF']);
+        header("Location: riwayat_tugas.php");
         exit();
     
     } else {
         $error_message = "Error: " . mysqli_error($conn);
     }
 }
-
+$guru_id = $_SESSION['guru_id'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -155,7 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Pilih Kelas</option>
                         <?php 
-                        $kelas_list = getDaftarKelas();
+                        $kelas_list = getDaftarKelas($guru_id);
                         while ($row = mysqli_fetch_assoc($kelas_list)) {
                             echo "<option value='" . $row['id_kelas'] . "'>" . $row['tingkat'],$row['nama_kelas'] . "</option>";
                         }
