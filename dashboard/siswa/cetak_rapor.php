@@ -1,123 +1,74 @@
 <?php
-include '../../koneksi.php';
-
+include "../../koneksi.php";
 session_start();
 
+// Memeriksa apakah pengguna sudah login
 if (!isset($_SESSION['nama_lengkap'])) {
     header("Location: ../../login.php");
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $siswa_id = $_POST['siswa_id'];
-    $semester = $_POST['semester'];
+// Ambil nama siswa dari session
+$nama_siswa = $_SESSION['nama_lengkap'];
 
-    // Mengambil data nilai dan informasi rapor siswa
-    $query = "SELECT siswa.nama_lengkap, siswa.nis, rapot.semester, rapot.tahun_ajaran, rapot.komentar, siswa.kelas_id
-              FROM siswa
-              LEFT JOIN rapot ON siswa.id_siswa = rapot.siswa_id AND rapot.semester = ?
-              WHERE siswa.id_siswa = ?";
+// Query untuk mendapatkan ID siswa berdasarkan nama lengkap
+$query_siswa = "SELECT * FROM siswa, kelas WHERE nama_lengkap = '$nama_siswa' AND kelas_id = id_kelas";
+$result_siswa = mysqli_query($conn, $query_siswa);
+$siswa = mysqli_fetch_assoc($result_siswa);
+$id_siswa = $siswa['id_siswa'];
 
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "ss", $semester, $siswa_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $siswa = mysqli_fetch_assoc($result);
-
-    // Mengambil nilai siswa
-    $nilai_query = "SELECT mata_pelajaran.nama_pelajaran, nilai.nilai
-                    FROM nilai
-                    JOIN mata_pelajaran ON nilai.mata_pelajaran_id = mata_pelajaran.id_mata_pelajaran
-                    WHERE nilai.siswa_id = ? AND nilai.semester = ?";
-
-    $nilai_stmt = mysqli_prepare($conn, $nilai_query);
-    mysqli_stmt_bind_param($nilai_stmt, "ss", $siswa_id, $semester);
-    mysqli_stmt_execute($nilai_stmt);
-    $nilai_result = mysqli_stmt_get_result($nilai_stmt);
-    $nilai_data = mysqli_fetch_all($nilai_result, MYSQLI_ASSOC);
-
-    $kelas_id = $siswa['kelas_id'] ?? null;
-    $kelas = null;
-    if ($kelas_id) {
-        // Query untuk mengambil data kelas berdasarkan kelas_id
-        $query_kelas = "SELECT nama_kelas FROM kelas WHERE id_kelas = $kelas_id";
-        $result_kelas = mysqli_query($conn, $query_kelas);
-        $kelas = mysqli_fetch_assoc($result_kelas);
-    }
-}
+// Query untuk mendapatkan daftar semester yang tersedia
+$query_semester = "SELECT DISTINCT semester FROM rapot WHERE siswa_id = '$id_siswa' ORDER BY semester";
+$result_semester = mysqli_query($conn, $query_semester);
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Rapor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        @media print {
-            .btn-print {
-                display: none;
-            }
-        }
-    </style>
+    <title>Pilih Semester</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-800">
-    <div class="container mt-5">
-        <?php if ($siswa && $siswa['semester']): ?>
-            <h1 class="text-center">Rapor Siswa</h1>
+<!-- Sidebar -->
+<?php include '../../layout/sidebar.php'; ?>
 
-            <div class="card">
-                <div class="card-header">
-                    Rapor Semester: <?= htmlspecialchars($siswa['semester']) ?> - Tahun Ajaran: <?= htmlspecialchars($siswa['tahun_ajaran']) ?>
+<!-- Navbar -->
+<header id="header" class="bg-blue-500 text-white py-4 transition-all duration-300">
+    <?php include '../../layout/header.php' ?>
+</header>
+
+<!-- Main Content -->
+<div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
+    <div class="container mx-auto mt-6 px-4">
+        <h2 class="text-4xl font-bold text-center mb-6">Pilih Semester</h2>
+
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <form action="cetak_rapot.php" method="GET">
+                <div class="mb-4">
+                    <label for="semester" class="block text-lg font-semibold mb-2">Semester:</label>
+                    <select name="semester" id="semester" class="border border-gray-300 rounded-md p-2 w-full">
+                        <option value="">-- Pilih Semester --</option>
+                        <?php if (mysqli_num_rows($result_semester) > 0): ?>
+                            <?php while ($row_semester = mysqli_fetch_assoc($result_semester)): ?>
+                                <option value="<?php echo $row_semester['semester']; ?>">
+                                    <?php echo $row_semester['semester']; ?>
+                                </option>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <option value="">Belum ada semester yang tersedia.</option>
+                        <?php endif; ?>
+                    </select>
                 </div>
-                <div class="card-body">
-                    <h5>Nama Siswa: <?= htmlspecialchars($siswa['nama_lengkap']) ?></h5>
-                    <p>NIS: <?= htmlspecialchars($siswa['nis']) ?></p>
-                    <p>Kelas: <?= htmlspecialchars($kelas['nama_kelas'] ?? 'Tidak diketahui') ?></p>
-
-                    <h6>Nilai</h6>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Mata Pelajaran</th>
-                                <th>Nilai</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if ($nilai_data): ?>
-                                <?php foreach ($nilai_data as $nilai): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($nilai['nama_pelajaran']) ?></td>
-                                        <td><?= htmlspecialchars($nilai['nilai']) ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="2" class="text-center">Belum ada nilai.</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-
-                    <h6>Komentar: <?= htmlspecialchars($siswa['komentar'] ?? 'Tidak ada komentar') ?></h6>
-
-                    <a href="cetak_rapot.php" class="btn btn-primary btn-print">Selesai</a>
-                    <a href="#" class="btn btn-success btn-print" onclick="window.print();">Cetak Rapor</a>
+                <div class="text-center">
+                    <button type="submit" class="py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200">
+                        Lihat Rapor
+                    </button>
                 </div>
-            </div>
-        <?php else: ?>
-            <div class="alert alert-warning text-center" role="alert">
-                Nilai rapor belum keluar. Silakan cek kembali nanti.
-            </div>
-            <script>
-                setTimeout(function() {
-                    window.location.href = 'cetak_rapot.php'; // Ganti dengan halaman form input yang sesuai
-                }, 3000);
-            </script>
-        <?php endif; ?>
+            </form>
+        </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
 </body>
 </html>

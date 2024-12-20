@@ -79,18 +79,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include '../../layout/sidebar.php'; ?>
 
     <!-- Navbar -->
-    <header id="header" class="bg-pink-500 text-white py-4 transition-all duration-300">
+    <header id="header" class="bg-blue-500 text-white py-4 transition-all duration-300">
         <?php include '../../layout/header.php'; ?>
     </header>
 
     <!-- Main Content -->
     <div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
-        <h2 class="text-2xl font-bold text-center text-pink-600 mb-6">Halaman Pengumpulan Tugas</h2>
+        <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Halaman Pengumpulan Tugas</h2>
 
         <!-- Tugas List -->
         <div class="bg-white shadow-lg rounded-lg p-6">
             <table class="table-auto w-full border-collapse border border-gray-300">
-                <thead class="bg-pink-500 text-white">
+                <thead class="bg-blue-500 text-white">
                     <tr>
                         <th class="border border-gray-300 px-4 py-2">No</th>
                         <th class="border border-gray-300 px-4 py-2">Judul Tugas</th>
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <form method='POST' action='' enctype='multipart/form-data'>
                                         <input type='hidden' name='id_tugas' value='{$tugas['id_tugas']}'>
                                         <input type='file' name='file_tugas' class='mb-2' required>
-                                        <button type='submit' class='bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600'>Kumpulkan</button>
+                                        <button type='submit' class='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'>Kumpulkan</button>
                                     </form>
                                 </td>
                             </tr>";

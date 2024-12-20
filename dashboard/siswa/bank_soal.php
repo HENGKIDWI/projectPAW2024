@@ -2,50 +2,117 @@
 include "../../koneksi.php";
 session_start();
 
-// Ambil semua soal dari tabel bank_soal
-$query = "SELECT * FROM bank_soal";
-$result = mysqli_query($conn, $query);
+// Memeriksa apakah pengguna sudah login
+if (!isset($_SESSION['nama_lengkap'])) {
+    header("Location: ../../login.php");
+    exit;
+}
+
+// Function to get filtered bank soal data
+function getBankSoal($search = '', $mataPelajaran = '', $kelas = '') {
+    global $conn;
+    $query = "SELECT * FROM bank_soal WHERE 1=1";
+    
+    if (!empty($search)) {
+        $search = mysqli_real_escape_string($conn, $search);
+        $query .= " AND (judul_bank_soal LIKE '%$search%' OR detail_bank_soal LIKE '%$search%')";
+    }
+    
+    if (!empty($mataPelajaran)) {
+        $mataPelajaran = mysqli_real_escape_string($conn, $mataPelajaran);
+        $query .= " AND mata_pelajaran = '$mataPelajaran'";
+    }
+    
+    if (!empty($kelas)) {
+        $kelas = mysqli_real_escape_string($conn, $kelas);
+        $query .= " AND kelas = '$kelas'";
+    }
+    
+    $query .= " ORDER BY id ASC";
+    $result = mysqli_query($conn, $query);
+    return $result;
+}
+
+// Get filter values
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+$selectedMataPelajaran = isset($_GET['mata_pelajaran']) ? $_GET['mata_pelajaran'] : '';
+$selectedKelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
+
+$bank_soal = getBankSoal($search, $selectedMataPelajaran, $selectedKelas);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Soal untuk Siswa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Daftar Bank Soal</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 text-gray-800">
-<body class="bg-gray-100 text-gray-800">
-    <!-- Sidebar -->
-    <?php include '../../layout/sidebar.php'; ?>
 
-    <!-- Navbar -->
-    <header id="header" class="bg-blue-600 text-white py-4 transition-all duration-300">
+<body class="bg-gray-50">
+    <?php include '../../layout/sidebar.php'; ?>
+    
+    <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md py-4">
         <?php include '../../layout/header.php'; ?>
     </header>
 
-    <div class="container mx-auto mt-8 px-4">
-        <h2 class="text-2xl font-bold text-center mb-6">Bank Soal</h2>
-        
-        <form action="proses_jawaban.php" method="POST">
-            <?php while ($row = mysqli_fetch_assoc($result)): ?>
-            <div class="bg-white shadow-md rounded-lg p-6 mt-4">
-                <h4 class="text-xl font-semibold"><?= $row['soal'] ?></h4>
-                <input type="hidden" name="soal_id[]" value="<?= $row['id_soal'] ?>">
-                <textarea name="jawaban[]" rows="4" 
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                    placeholder="Jawaban Anda"></textarea>
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Daftar Bank Soal</h1>
             </div>
-            <?php endwhile; ?>
 
-            <div class="text-right mt-6">
-                <button type="submit" 
-                    class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-300">
-                    Kirim Jawaban
-                </button>
+            <!-- Search and Filter Form -->
+            <form method="GET" class="mb-6 flex gap-4">
+                <div class="flex-1">
+                    <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
+                        placeholder="Cari soal..."
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <select name="mata_pelajaran" class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Mata Pelajaran</option>
+                    <option value="Matematika" <?php echo $selectedMataPelajaran == 'Matematika' ? 'selected' : ''; ?>>Matematika</option>
+                    <option value="Bahasa Indonesia" <?php echo $selectedMataPelajaran == 'Bahasa Indonesia' ? 'selected' : ''; ?>>Bahasa Indonesia</option>
+                    <option value="Fisika" <?php echo $selectedMataPelajaran == 'Fisika' ? 'selected' : ''; ?>>Fisika</option>
+                </select>
+                <select name="kelas" class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Kelas</option>
+                    <option value="7" <?php echo $selectedKelas == '7' ? 'selected' : ''; ?>>Kelas 7</option>
+                    <option value="8" <?php echo $selectedKelas == '8' ? 'selected' : ''; ?>>Kelas 8</option>
+                    <option value="9" <?php echo $selectedKelas == ' 9' ? 'selected' : ''; ?>>Kelas 9</option>
+                </select>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">Cari</button>
+            </form>
+
+            <!-- Daftar Soal -->
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <table class="min-w-full">
+                    <thead>
+                        <tr>
+                            <th class="py-2 px-4 border-b">Judul Soal</th>
+                            <th class="py-2 px-4 border-b">Mata Pelajaran</th>
+                            <th class="py-2 px-4 border-b">Kelas</th>
+                            <th class="py-2 px-4 border-b">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = mysqli_fetch_assoc($bank_soal)): ?>
+                        <tr>
+                            <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($row['judul_bank_soal']); ?></td>
+                            <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($row['mata_pelajaran']); ?></td>
+                            <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($row['kelas']); ?></td>
+                            <td class="py-2 px-4 border-b">
+                                <a href="kerjakan_soal.php?id=<?php echo $row['id']; ?>" class="text-blue-600 hover:underline">Kerjakan</a>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
             </div>
-        </form>
-    </div>
+        </div>
+    </main>
 </body>
+
 </html>
