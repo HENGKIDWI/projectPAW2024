@@ -26,13 +26,13 @@
     <?php include '../../layout/sidebar.php'; ?>
 
     <!-- Navbar -->
-    <header id="header" class="bg-pink-500 text-white py-4 transition-all duration-300">
+    <header id="header" class="bg-blue-500 text-white py-4 transition-all duration-300">
         <?php include '../../layout/header.php' ?>
     </header>
 
     <!-- Main Content -->
     <div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
-        <h2 class="text-2xl font-bold text-center text-pink-600 mb-6">Daftar Kelas Minat Bakat</h2>
+        <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Daftar Kelas Minat Bakat</h2>
 
         <!-- Selamat Datang -->
         <div class="bg-white shadow-lg rounded-lg p-6 mb-6 text-center">
@@ -43,16 +43,14 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <?php
                 $kelas = [
-                    ["nama" => "Musik", "deskripsi" => "Pelajari berbagai instrumen dan teori musik untuk meningkatkan kemampuan bermusik Anda."],
-                    ["nama" => "Olahraga", "deskripsi" => "Ikuti berbagai aktivitas fisik dan pelatihan untuk menjaga kebugaran tubuh."],
-                    ["nama" => "Seni Rupa", "deskripsi" => "Eksplorasi kreativitas Anda melalui lukisan, menggambar, dan media seni lainnya."]
+                    ["nama" => "Musik", "deskripsi" => "Pelajari berbagai instrumen dan teori musik untuk meningkatkan kemampuan bermusik Anda."], 
                 ];
 
                 foreach ($kelas as $k) {
                     echo "<div class='bg-white shadow-lg rounded-lg p-6 text-center'>";
                     echo "<h3 class='text-xl font-bold mb-2'>{$k['nama']}</h3>";
                     echo "<p class='text-gray-600 mb-4'>{$k['deskripsi']}</p>";
-                    echo "<button class='bg-pink-500 text-white py-2 px-4 rounded-lg hover:bg-pink-600' onclick=\"showRegistrationForm('{$k['nama']}')\">View</button>";
+                    echo "<button class='bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600' onclick=\"showRegistrationForm('{$k['nama']}')\">View</button>";
                     echo "</div>";
                 }
             ?>
@@ -76,7 +74,7 @@
                 </div>
                 <input type="hidden" name="kelas_tujuan" id="kelasTujuan">
                 <div class="text-center">
-                    <button type="submit" class="bg-pink-500 text-white py-2 px-4 rounded-lg hover:bg-pink-600">Kirim</button>
+                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Kirim</button>
                 </div>
             </form>
         </div>

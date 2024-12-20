@@ -156,5 +156,6 @@ $result_kelas = mysqli_query($conn, $query_kelas);
             <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">Simpan Perubahan</button>
         </form>
     </div>
+ <?php include '../../layout/footer.php'; ?>
 </body>
 </html>

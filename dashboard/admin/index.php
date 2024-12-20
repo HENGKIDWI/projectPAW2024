@@ -6,6 +6,7 @@ if (!isset($_SESSION['nama_lengkap'])) {
     header("Location: ../../login.php");
     exit;
 }
+$tanggalWaktuSekarang = date("l, d F Y H:i:s");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,9 +48,10 @@ if (!isset($_SESSION['nama_lengkap'])) {
 
     <!-- Informasi Umum Admin -->
     <div class="bg-white shadow-md rounded-lg p-6 mb-6 fade-in">
+      <b><?php echo htmlspecialchars($tanggalWaktuSekarang); ?></b>
+      <br> <hr> <br>
       <h3 class="text-xl font-semibold">Selamat Datang, <?php echo htmlspecialchars($_SESSION['nama_lengkap']); ?>!</h3>
       <p class="text-gray-600 mt-4">Ini adalah dashboard untuk admin yang memungkinkan Anda untuk mengelola berbagai aspek sistem, termasuk data siswa, guru, pengumuman, dan lebih banyak lagi.</p>
-
       <h3 class="text-lg font-semibold mt-6">Ringkasan Pengelolaan Sistem</h3>
       <ul class="list-disc pl-6 mt-4 text-gray-600">
         <li>Menambah, mengedit, dan menghapus data siswa dan guru.</li>
@@ -104,7 +106,7 @@ if (!isset($_SESSION['nama_lengkap'])) {
       </ul>
     </div>
   </div>
-
+ <?php include '../../layout/footer.php'; ?>
   <script>
     function openNav() {
       document.getElementById("mySidebar").classList.remove("-translate-x-full");

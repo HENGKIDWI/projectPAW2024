@@ -25,13 +25,13 @@
     <?php include '../../layout/sidebar.php'; ?>
 
     <!-- Navbar -->
-    <header id="header" class="bg-pink-500 text-white py-4 transition-all duration-300">
+    <header id="header" class="bg-blue-500 text-white py-4 transition-all duration-300">
         <?php include '../../layout/header.php' ?>
     </header>
 
     <!-- Main Content -->
     <div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
-        <h2 class="text-2xl font-bold text-center text-pink-600 mb-6">Halaman Konseling</h2>
+        <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Halaman Konseling</h2>
 
         <!-- Selamat Datang -->
         <div class="bg-white shadow-lg rounded-lg p-6 mb-6 text-center">
@@ -52,7 +52,7 @@
                     <textarea name="masalah" id="masalah" rows="4" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-pink-300" placeholder="Tuliskan masalah Anda..." required></textarea>
                 </div>
                 <div class="text-center">
-                    <button type="submit" class="bg-pink-500 text-white py-2 px-4 rounded-lg hover:bg-pink-600">Kirim</button>
+                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Kirim</button>
                 </div>
             </form>
         </div>

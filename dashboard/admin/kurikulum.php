@@ -59,28 +59,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nama = trim($_POST['nama']);
         $deskripsi = trim($_POST['deskripsi']);
 
-        if (!empty($tahun_ajaran) && !empty($nama)) {
-            $queryCheck = "SELECT * FROM kurikulum WHERE tahun_ajaran = ?";
-            $stmtCheck = mysqli_prepare($conn, $queryCheck);
-            mysqli_stmt_bind_param($stmtCheck, 's', $tahun_ajaran);
-            mysqli_stmt_execute($stmtCheck);
-            $resultCheck = mysqli_stmt_get_result($stmtCheck);
+        // Prepare the insert statement
+        $queryInsert = "INSERT INTO kurikulum (tahun_ajaran, nama, deskripsi) VALUES (?, ?, ?)";
+        $stmtInsert = mysqli_prepare($conn, $queryInsert);
+        mysqli_stmt_bind_param($stmtInsert, 'sss', $tahun_ajaran, $nama, $deskripsi);
 
-            if (mysqli_num_rows($resultCheck) > 0) {
-                $error_message = "Kurikulum untuk tahun ajaran ini sudah ada.";
-            } else {
-                $queryInsert = "INSERT INTO kurikulum (tahun_ajaran, nama,deskripsi, dipakai) VALUES (?, ?, ?, 'tidak')";
-                $stmtInsert = mysqli_prepare($conn, $queryInsert);
-                mysqli_stmt_bind_param($stmtInsert, 'ss', $tahun_ajaran, $nama,);
-
-                if (mysqli_stmt_execute($stmtInsert)) {
-                    $success_message = "Kurikulum berhasil ditambahkan.";
-                } else {
-                    $error_message = "Terjadi kesalahan saat menambahkan data.";
-                }
-            }
+        if (mysqli_stmt_execute($stmtInsert)) {
+            $success_message = "Kurikulum berhasil ditambahkan.";
         } else {
-            $error_message = "Semua field wajib diisi.";
+            $error_message = "Terjadi kesalahan saat menambahkan kurikulum.";
         }
     }
 }
@@ -160,8 +147,8 @@ $resultDropdown = mysqli_query($conn, $queryDropdown);
                     <tr class="bg-gray-100">
                         <th class="border px-4 py-2 text-left text-gray-700">Tahun Ajaran</th>
                         <th class="border px-4 py-2 text-left text-gray-700">Nama Kurikulum</th>
-                        <th class="border px-4 py-2 text-center text-gray-700">Status</th>
                         <th class="border px-4 py-2 text-center text-gray-700">Deskripsi</th>
+                        <th class="border px-4 py-2 text-center text-gray-700">Status</th>
                         <th class="border px-4 py-2 text-center text-gray-700">Aksi</th>
                     </tr>
                 </thead>
@@ -204,6 +191,8 @@ $resultDropdown = mysqli_query($conn, $queryDropdown);
             </table>
         </div>
     </div>
+ <?php include '../../layout/footer.php'; ?>
+
 </body>
 
 </html>

@@ -166,5 +166,7 @@ if (!isset($_SESSION['nama_lengkap'])) {
             </section>
         </main>
     </div>
+ <?php include '../../layout/footer.php'; ?>
+
 </body>
 </html>

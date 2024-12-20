@@ -173,6 +173,8 @@ $count = 1;
       </div>
     </main>
   </div>
+ <?php include '../../layout/footer.php'; ?>
+
 </body>
 
 </html>

@@ -13,13 +13,30 @@ if (isset($_POST['submit'])) {
     $deskripsi = $_POST['deskripsi'];
     $tanggal_publikasi = $_POST['tanggal_publikasi'];
 
-    $insert_query = "INSERT INTO informasi (judul_informasi, deskripsi, tanggal_publikasi, status) 
-                     VALUES ('$judul', '$deskripsi', '$tanggal_publikasi', 'aktif')";
-    mysqli_query($conn, $insert_query);
+    // Menentukan status berdasarkan tanggal publikasi
+    $tanggal_sekarang = date('Y-m-d'); // Mendapatkan tanggal saat ini
+    if ($tanggal_publikasi >= $tanggal_sekarang) {
+        // Jika tanggal publikasi besok, status akan aktif besok
+        $status = 'aktif';
+    } else {
+        // Jika tanggal publikasi hari ini atau sebelumnya, status langsung aktif
+        $status = 'tidak aktif';
+    }
 
-    header("Location: dashboard.php"); // Redirect setelah input
+    // Query untuk memasukkan data
+    $insert_query = "INSERT INTO informasi (judul_informasi, deskripsi, tanggal_publikasi, status, dibuat_oleh) 
+                     VALUES ('$judul', '$deskripsi', '$tanggal_publikasi', '$status', 'admin')";
+    if (mysqli_query($conn, $insert_query)) {
+        $_SESSION['status'] = "Data berhasil ditambahkan!";
+        $_SESSION['status_code'] = "success";
+        header("Location: viewInformasiDetail.php");
+    } else {
+        $_SESSION['status'] = "Gagal menambahkan data!";
+        $_SESSION['status_code'] = "error";
+    }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -70,4 +87,11 @@ if (isset($_POST['submit'])) {
     </div>
   </div>
 </body>
+<script>
+  <?php if (isset($_SESSION['status'])) { ?>
+    alert("<?php echo $_SESSION['status']; ?>");
+    <?php unset($_SESSION['status']); ?>
+  <?php } ?>
+</script>
+
 </html>

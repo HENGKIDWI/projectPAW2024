@@ -1,6 +1,7 @@
 <!-- sidebar.php -->
 <div id="mySidebar" class="fixed top-0 left-0 w-64 h-full bg-gray-800 text-white transform -translate-x-full transition-transform duration-300">
     <button class="absolute top-4 right-4 text-2xl" onclick="closeNav()">&times;</button>
+
     <nav class="mt-10">
         <?php
         if (isset($_SESSION['role'])) {
@@ -17,7 +18,7 @@
                 echo '<a href="../../dashboard/admin/edit-profile.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-user-cog mr-2"></i>Edit Profil Admin</a>';
                 echo '<a href="../../dashboard/admin/buat_jadwal.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-calendar-plus mr-2"></i>Buat Jadwal</a>';
                 echo '<a href="../../dashboard/admin/aboutus.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-info-circle mr-2"></i>About Us</a>';
-                echo '<a href="../../dashboard/admin/admin_laporan.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-info-circle mr-2"></i>laporan kerusakan</a>';
+                echo '<a href="../../dashboard/admin/admin_laporan.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fa-regular fa-flag mr-2 "></i>laporan kerusakan</a>';
             }
             // Jika role adalah guru
             elseif ($_SESSION['role'] == 'guru') {
@@ -56,19 +57,14 @@
     </nav>
 </div>
 
-
 <script>
   function openNav() {
     document.getElementById("mySidebar").classList.remove("-translate-x-full");
     document.getElementById("mySidebar").classList.add("translate-x-0");
-    document.getElementById("mainContent").classList.add("ml-64");
-    document.getElementById("header").classList.add("ml-64");
   }
 
   function closeNav() {
     document.getElementById("mySidebar").classList.remove("translate-x-0");
     document.getElementById("mySidebar").classList.add("-translate-x-full");
-    document.getElementById("mainContent").classList.remove("ml-64");
-    document.getElementById("header").classList.remove("ml-64");
   }
 </script>

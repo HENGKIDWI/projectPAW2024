@@ -91,18 +91,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["update_absensi"])) {
     <style>
         /* Tambahkan style cetak */
         @media print {
+
             body * {
-                visibility: hidden; /* Sembunyikan semua elemen */
+                visibility: hidden;
+                /* Sembunyikan semua elemen */
             }
-            .printable-area, #printable-area * {
-                visibility: visible; /* Tampilkan elemen tertentu */
+
+            .printable-area,
+            #printable-area * {
+                visibility: visible;
+                /* Tampilkan elemen tertentu */
+                background-image: none !important;
+                margin-top: 0%;
             }
-            #cetak,#kembali,#perbarui{
-                display: none !important;
+
+            #cetak,
+            #kembali,
+            #perbarui {
+                display: none ;
             }
+
             .printable-area {
                 position: absolute;
-                top: 0;
+                top: 1;
                 left: 0;
             }
         }
@@ -175,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["update_absensi"])) {
 
                     <div class="mt-4 flex justify-end gap-4">
                         <a href="input_absen.php" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500" id="kembali">Kembali</a>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 "id='cetak' onclick="window.print()">Cetak</button>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 " id='cetak' onclick="window.print()">Cetak</button>
                         <button type="submit" name="update_absensi" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" id="perbarui">Perbarui Absensi</button>
                     </div>
                 </form>

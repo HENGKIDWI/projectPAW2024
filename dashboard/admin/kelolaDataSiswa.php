@@ -284,6 +284,7 @@ $result_kelas = mysqli_query($conn, $query_kelas);
         </div>
     </div>
 </div>
+<?php include '../../layout/footer.php'; ?>
 
 
 <!-- Include Bootstrap JS and jQuery -->
