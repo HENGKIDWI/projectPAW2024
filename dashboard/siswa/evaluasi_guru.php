@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+// Pastikan siswa sudah login berdasarkan nama lengkap
 if (!isset($_SESSION['nama_lengkap'])) {
     header("Location: ../../login.php");
     exit;
@@ -13,20 +14,32 @@ include '../../koneksi.php';
 $guru_query = "SELECT * FROM guru";
 $guru_result = $conn->query($guru_query);
 
+// Variabel untuk notifikasi
+$success_message = "";
+
 // Proses pengiriman formulir
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $guru_id = $_POST['guru_id'];
     $komentar = $_POST['komentar'];
     $rating = $_POST['rating'];
-    $siswa_id = $_SESSION['siswa_id']; // Pastikan siswa_id disimpan di session
+
+    // Ambil nama lengkap siswa dari session untuk mendapatkan siswa_id
+    $nama_lengkap = $_SESSION['nama_lengkap'];
+
+    // Ambil id_siswa berdasarkan nama_lengkap
+    $siswa_query = "SELECT id_siswa FROM siswa WHERE nama_lengkap = '$nama_lengkap'";
+    $siswa_result = $conn->query($siswa_query);
+    $siswa_row = $siswa_result->fetch_assoc();
+    $siswa_id = $siswa_row['id_siswa']; // ID siswa yang login
 
     // Pastikan semua input diisi
-    if (!empty($guru_id) && !empty($komentar) && !empty($rating) && !empty($siswa_id)) {
+    if (!empty($guru_id) && !empty($komentar) && !empty($rating)) {
         // Penggunaan mysqli_query
-        $query = "INSERT INTO evaluasi (siswa_id, guru_id, komentar, rating) VALUES ('$siswa_id', '$guru_id', '$komentar', '$rating')";
+        $query = "INSERT INTO evaluasi (siswa_id, guru_id, komentar, rating) 
+                  VALUES ('$siswa_id', '$guru_id', '$komentar', '$rating')";
         
         if (mysqli_query($conn, $query)) {
-            echo "<script>alert('Komentar berhasil terkirim!');</script>";
+            $success_message = "Komentar berhasil terkirim!";
         } else {
             echo "<script>alert('Terjadi kesalahan saat mengirim komentar: " . mysqli_error($conn) . "');</script>";
         }
@@ -42,11 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Siswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        function showSuccessMessage() {
-            alert('Komentar berhasil terkirim!');
-        }
-    </script>
     <style>
         .rating {
             direction: rtl;
@@ -80,6 +88,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
         <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Evaluasi Guru</h2>
 
+        <!-- Notifikasi -->
+        <?php if (!empty($success_message)): ?>
+            <div class="bg-green-100 text-green-700 border border-green-400 px-4 py-3 rounded mb-4">
+                <?= $success_message; ?>
+            </div>
+        <?php endif; ?>
+
         <!-- Selamat Datang -->
         <div class="bg-white shadow-lg rounded-lg p-6 mb-6 text-center">
             <h3 class="text-gray-600 mt-2">Menu Evaluasi Kinerja Guru.</h3>
@@ -89,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="bg-white shadow-lg rounded-lg p-6">
             <h3 class="text-lg font-semibold mb-4">Evaluasi Kinerja Guru</h3>
 
-            <form action="" method="POST" onsubmit="showSuccessMessage()">
+            <form action="" method="POST">
                 <!-- Dropdown Nama Guru -->
                 <div class="mb-4">
                     <label for="guru_id" class="block text-gray-700 font-medium mb-2">Pilih Nama Guru:</label>

@@ -66,7 +66,7 @@ if (!isset($_SESSION['nama_lengkap'])) {
       <div class="bg-teal-100 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
         <h4 class="text-xl font-semibold text-teal-600">Jadwal Pelajaran</h4>
         <p class="mt-4 text-gray-800">Lihat jadwal lengkap pelajaran yang akan datang.</p>
-        <a href="jadwalPelajaran.php" class="mt-4 inline-block text-teal-600 hover:text-teal-800">Lihat Jadwal &rarr;</a>
+        <a href="cetak_jadwal.php" class="mt-4 inline-block text-teal-600 hover:text-teal-800">Lihat Jadwal &rarr;</a>
       </div>
 
       <!-- Card 2: Tugas -->
