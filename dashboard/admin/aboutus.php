@@ -32,7 +32,7 @@ if (!isset($_SESSION['nama_lengkap'])) {
       <section>
         <h2 class="text-3xl font-bold text-gray-700 mb-4">Tentang Sistem Web</h2>
         <p class="text-gray-600 leading-relaxed mb-4">
-          Sistem informasi sekolah kami dirancang untuk mempermudah pengelolaan data siswa, guru, 
+          Asispen dirancang untuk mempermudah pengelolaan data siswa, guru, 
           serta kegiatan belajar mengajar. Dengan antarmuka yang intuitif dan fitur yang lengkap, 
           sistem ini memberikan kemudahan akses bagi semua pihak yang terlibat.
         </p>

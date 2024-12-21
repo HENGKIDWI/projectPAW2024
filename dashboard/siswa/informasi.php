@@ -47,17 +47,16 @@ $pengumumanList = mysqli_fetch_all($result, MYSQLI_ASSOC);
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
+    <!-- Sidebar -->
+    <?php include '../../layout/sidebar.php'; ?>
 
-  <!-- Sidebar -->
-  <?php include '../../layout/sidebar.php'; ?>
+<!-- Navbar -->
+<header id="header" class="bg-blue-500 text-white py-4 transition-all duration-300 no-print">
+    <?php include '../../layout/header.php' ?>
+</header>
 
-  <!-- Navbar -->
-  <header id="header" class="bg-blue-600 text-white py-4 transition-all duration-300">
-    <?php include '../../layout/header.php'; ?>
-  </header>
-
-  <!-- Main Content -->
-  <div class="container my-5">
+<!-- Main Content -->
+<div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
     <h1 class="text-center mb-4">Pengumuman</h1>
 
     <div class="announcement-container">
@@ -75,7 +74,8 @@ $pengumumanList = mysqli_fetch_all($result, MYSQLI_ASSOC);
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
-  </div>
+</div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -36,8 +36,9 @@ if (isset($_POST['update_semua'])) {
 
     <!-- Navbar -->
     <header id="header" class="bg-blue-600 text-white py-4 transition-all duration-300">
-    <?php include '../../layout/header.php' ?>
+        <?php include '../../layout/header.php'; ?>
     </header>
+
     <div class="container mx-auto mt-10 p-6 bg-white rounded shadow-md">
         <h2 class="text-3xl font-bold mb-6 text-center text-gray-700">Update Struktur Sekolah</h2>
 
@@ -54,10 +55,13 @@ if (isset($_POST['update_semua'])) {
                     </div>
                 <?php } ?>
             </div>
-            <div class="text-right">
+            <div class="flex justify-between items-center">
                 <button type="submit" name="update_semua" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">
                     Update Semua
                 </button>
+                <a href="view-struktur.php" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">
+                    Lihat Struktur
+                </a>
             </div>
         </form>
     </div>

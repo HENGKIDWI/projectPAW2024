@@ -15,6 +15,13 @@ $result_siswa = mysqli_query($conn, $query_siswa);
 // Ambil data mata pelajaran untuk input nilai
 $query_mapel = "SELECT id_mata_pelajaran, nama_pelajaran FROM mata_pelajaran";
 $result_mapel = mysqli_query($conn, $query_mapel);
+
+// Query untuk mendapatkan data riwayat rapor
+$query_riwayat = "SELECT r.id_rapot, s.nama_lengkap AS nama_siswa, r.semester, r.tahun_ajaran, r.nilai_rata, r.ekskul, r.nilai_ekskul, r.catatan_wali FROM rapot AS r
+    INNER JOIN siswa AS s ON r.siswa_id = s.id_siswa
+    ORDER BY r.tahun_ajaran DESC, r.semester ASC
+";
+$result_riwayat = mysqli_query($conn, $query_riwayat);
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +29,7 @@ $result_mapel = mysqli_query($conn, $query_mapel);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Rapor Siswa</title>
+    <title>Input dan Riwayat Rapor</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -36,11 +43,12 @@ $result_mapel = mysqli_query($conn, $query_mapel);
 
     <!-- Main Content -->
     <div class="container mx-auto mt-6 px-4">
-        <h2 class="text-3xl font-semibold text-center mb-6">Input Rapor Siswa</h2>
+        <h2 class="text-3xl font-semibold text-center mb-6">Input dan Riwayat Rapor</h2>
 
         <!-- Form Input Rapor -->
-        <div class="bg-white shadow-lg rounded-lg p-6">
-            <form action="proses_input_rapor.php" method="POST">
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+            <h3 class="text-2xl font-semibold mb-4">Form Input Rapor</h3>
+            <form action="proses_input_rapot.php" method="POST">
                 <!-- Dropdown Siswa -->
                 <div class="mb-4">
                     <label for="id_siswa" class="block text-sm font-medium">Nama Siswa</label>
@@ -72,6 +80,13 @@ $result_mapel = mysqli_query($conn, $query_mapel);
                 <!-- Input Nilai Mata Pelajaran -->
                 <div class="mb-4">
                     <h3 class="text-lg font-semibold mb-2">Nilai Mata Pelajaran</h3>
+                    <p class="text-sm text-gray-600 mt-2">
+                        <strong>Rentang Nilai untuk Predikat:</strong><br>
+                        A: 85-100<br>
+                        B: 70-84<br>
+                        C: 55-69<br>
+                        D: 0-54
+                    </p>
                     <?php while ($mapel = mysqli_fetch_assoc($result_mapel)): ?>
                         <div class="mb-2">
                             <label class="block font-medium"><?php echo $mapel['nama_pelajaran']; ?></label>
@@ -85,7 +100,6 @@ $result_mapel = mysqli_query($conn, $query_mapel);
                         </div>
                     <?php endwhile; ?>
                 </div>
-
                 <!-- Nilai Rata-Rata -->
                 <div class="mb-4">
                     <label for="nilai_rata_rata" class="block text-sm font-medium">Nilai Rata-Rata</label>
@@ -96,14 +110,16 @@ $result_mapel = mysqli_query($conn, $query_mapel);
                 <div class="mb-4">
                     <h3 class="text-lg font-semibold mb-2">Ekstrakurikuler</h3>
                     <input type="text" name="ekskul" class="w-full px-3 py-2 border rounded-md" placeholder="Nama Ekstrakurikuler" required>
-                    <input type="number" name="nilai_ekskul" class="w-full px-3 py-2 border rounded-md mt-2" placeholder="Nilai Ekstrakurikuler" min="0" max="100" required>
-                </div>
-
-                <!-- Input Prestasi -->
-                <div class="mb-4">
-                    <h3 class="text-lg font-semibold mb-2">Prestasi Siswa</h3>
-                    <input type="text" name="prestasi_akademik" class="w-full px-3 py-2 border rounded-md" placeholder="Prestasi Akademik">
-                    <input type="text" name="prestasi_non_akademik" class="w-full px-3 py-2 border rounded-md mt-2" placeholder="Prestasi Non-Akademik">
+                    
+                    <!-- Dropdown untuk Nilai Ekstrakurikuler -->
+                    <label for="nilai_ekskul" class="block text-sm font-medium mt-2">Nilai Ekstrakurikuler</label>
+                    <select name="nilai_ekskul" id="nilai_ekskul" class="w-full px-3 py-2 border rounded-md" required>
+                        <option value="A" selected disabled>-- Pilih Nilai --</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
                 </div>
 
                 <!-- Catatan Wali Kelas -->
@@ -117,6 +133,50 @@ $result_mapel = mysqli_query($conn, $query_mapel);
                 </button>
             </form>
         </div>
+    </div>
+
+    <!-- Riwayor -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h3 class="text-2xl font-semibold mb-4">Riwayat Data Input Rapor</h3>
+        <table class="table-auto w-full text-left border-collapse border border-gray-200">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border border-gray-300 px-4 py-2">No</th>
+                    <th class="border border-gray-300 px-4 py-2">Nama Siswa</th>
+                    <th class="border border-gray-300 px-4 py-2">Semester</th>
+                    <th class="border border-gray-300 px-4 py-2">Tahun Ajaran</th>
+                    <th class="border border-gray-300 px-4 py-2">Nilai Rata-Rata</th>
+                    <th class="border border-gray-300 px-4 py-2">Ekskul</th>
+                    <th class="border border-gray-300 px-4 py-2">Nilai Ekskul</th>
+                    <th class="border border-gray-300 px-4 py-2">Catatan Wali Kelas</th>
+                    <th class="border border-gray-300 px-4 py-2">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (mysqli_num_rows($result_riwayat) > 0): ?>
+                    <?php $no = 1; while ($row = mysqli_fetch_assoc($result_riwayat)): ?>
+                        <tr class="hover:bg-gray-50">
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $no++; ?></td>
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['nama_siswa']; ?></td>
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['semester']; ?></td>
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['tahun_ajaran']; ?></td>
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['nilai_rata']; ?></td>
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['ekskul']; ?></td>
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['nilai_ekskul']; ?></td>
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['catatan_wali']; ?></td>
+                            <td class="border border-gray-300 px-4 py-2">
+                                <a href="edit_rapor.php?id_rapor=<?php echo $row['id_rapot']; ?>" class="text-blue-600">Edit</a> | 
+                                <a href="hapus_rapor.php?id_rapor=<?php echo $row['id_rapot']; ?>" class="text-red-600" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">Hapus</a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="8" class="text-center text-gray-500 py-4">Belum ada data rapor yang diinput.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
 
     <?php require_once "../../layout/footer.php"; ?>
@@ -136,11 +196,13 @@ $result_mapel = mysqli_query($conn, $query_mapel);
                         count++;
                     }
                 });
-                const rataRata = count > 0 ? (total / count).toFixed(2) : 0;
+                const rataRata = count > 0 ? (total / count).toFixed(2) : "";
                 rataRataInput.value = rataRata;
             }
 
-            nilaiInputs.forEach(input => input.addEventListener("input", hitungRataRata));
+            nilaiInputs.forEach(input => {
+                input.addEventListener("input", hitungRataRata);
+            });
         });
     </script>
 </body>
