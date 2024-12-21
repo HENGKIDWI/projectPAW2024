@@ -11,7 +11,6 @@ function getDaftarKelas($guru_id)
               JOIN jadwal ON kelas.id_kelas = jadwal.kelas_id 
               WHERE jadwal.guru_id = '$guru_id'";
   return mysqli_query($conn, $query);
-
 }
 
 // Fungsi untuk mengambil daftar tugas berdasarkan kelas
@@ -33,7 +32,7 @@ function getDaftarMurid($kelas)
 // Fungsi untuk mengambil data pengumpulan tugas
 function getPengumpulan($id_siswa, $id_tugas)
 {
-  echo "script(alert('$id_tugas'))";
+  // echo "script(alert('$id_tugas'))";
   global $conn;
   $query = "SELECT file_tugas, status_pengumpulan FROM pengumpulan_tugas 
             WHERE id_siswa = '$id_siswa' AND id_tugas = '$id_tugas'";
@@ -115,14 +114,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
 }
 
 
-// Variabel
+// Add new function to get existing nilai
+function getNilai($id_siswa, $id_tugas)
+{
+  global $conn;
+  $query = "SELECT nilai FROM pengumpulan_tugas 
+            WHERE id_siswa = '$id_siswa' AND id_tugas = '$id_tugas'";
+  $result = mysqli_query($conn, $query);
+  if ($result && $row = mysqli_fetch_assoc($result)) {
+    return $row['nilai'];
+  }
+  return null;
+}
+
+// Add function to count nilai status
+function hitungStatusNilai($kelas, $tugas)
+{
+  global $conn;
+
+  // Total siswa di kelas
+  $query_total = "SELECT COUNT(*) as total FROM siswa WHERE kelas_id = '$kelas'";
+  $total_murid = mysqli_fetch_assoc(mysqli_query($conn, $query_total))['total'];
+
+  // Siswa yang sudah dinilai
+  $query_sudah = "SELECT COUNT(*) as total 
+                  FROM pengumpulan_tugas pt 
+                  JOIN siswa s ON pt.id_siswa = s.id_siswa 
+                  WHERE s.kelas_id = '$kelas' 
+                  AND pt.id_tugas = '$tugas' 
+                  AND pt.nilai IS NOT NULL";
+  $sudah_dinilai = mysqli_fetch_assoc(mysqli_query($conn, $query_sudah))['total'];
+
+  $belum_dinilai = $total_murid - $sudah_dinilai;
+
+  return [$sudah_dinilai, $belum_dinilai];
+}
+
+// Process form submission code remains the same...
+
+// Variables
 $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
 $selected_tugas = isset($_POST['tugas']) ? $_POST['tugas'] : '';
 $sudah_dikumpulkan = 0;
 $belum_dikumpulkan = 0;
+$sudah_dinilai = 0;
+$belum_dinilai = 0;
 
 if ($selected_kelas && $selected_tugas) {
   list($sudah_dikumpulkan, $belum_dikumpulkan) = hitungPengumpulan($selected_kelas, $selected_tugas);
+  list($sudah_dinilai, $belum_dinilai) = hitungStatusNilai($selected_kelas, $selected_tugas);
 }
 
 $guru_id = $_SESSION['guru_id'];
@@ -220,15 +260,24 @@ $guru_id = $_SESSION['guru_id'];
             <input type="hidden" name="kelas" value="<?= $selected_kelas; ?>">
             <input type="hidden" name="tugas" value="<?= $selected_tugas; ?>">
             <input type="hidden" name="simpan_nilai" value="true">
-            <!-- Informasi Pengumpulan -->
             <?php if ($selected_kelas && $selected_tugas): ?>
-              <div class="mt-6 flex justify-between text-sm">
-                <span class="text-green-600 font-semibold">
-                  Sudah Dikumpulkan: <?= $sudah_dikumpulkan; ?> siswa
-                </span>
-                <span class="text-red-600 font-semibold">
-                  Belum Dikumpulkan: <?= $belum_dikumpulkan; ?> siswa
-                </span>
+              <div class="mt-6 space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-green-600 font-semibold">
+                    Sudah Dikumpulkan: <?= $sudah_dikumpulkan; ?> siswa
+                  </span>
+                  <span class="text-red-600 font-semibold">
+                    Belum Dikumpulkan: <?= $belum_dikumpulkan; ?> siswa
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-green-600 font-semibold">
+                    Sudah Dinilai: <?= $sudah_dinilai; ?> siswa
+                  </span>
+                  <span class="text-red-600 font-semibold">
+                    Belum Dinilai: <?= $belum_dinilai; ?> siswa
+                  </span>
+                </div>
               </div>
             <?php endif; ?>
         </div>
@@ -254,6 +303,7 @@ $guru_id = $_SESSION['guru_id'];
                   $no = 1;
                   while ($murid = mysqli_fetch_assoc($daftar_murid)) {
                     $pengumpulan = getPengumpulan($murid['id_siswa'], $selected_tugas);
+                    $nilai = getNilai($murid['id_siswa'], $selected_tugas);
                     $status = 'Belum Dikumpulkan';
                     $file_tugas = '-';
 
@@ -280,6 +330,7 @@ $guru_id = $_SESSION['guru_id'];
                                      name='nilai[{$murid['id_siswa']}]' 
                                      min='0' 
                                      max='100' 
+                                     value='" . ($nilai !== null ? $nilai : '') . "'
                                      class='w-20 border border-gray-300 rounded-md px-2 py-1 
                                             focus:outline-none focus:ring-2 focus:ring-blue-500 
                                             focus:border-blue-500 transition duration-200'>
@@ -290,7 +341,7 @@ $guru_id = $_SESSION['guru_id'];
                   ?>
                 </tbody>
               </table>
-              <div class="text-right mt-6">
+              <div class="text-right mt-6 mb-6 mr-6">
                 <button type="submit"
                   name="simpan_nilai"
                   class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-300">

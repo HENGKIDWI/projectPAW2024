@@ -2,7 +2,7 @@
 include "../../koneksi.php";
 session_start();
 
-// Fungsi untuk mengambil daftar kelas untuk percabanagan
+// Fungsi untuk mengambil daftar kelas untuk percabangan
 function getDaftarKelasPercabangan($id_kelas)
 {
   global $conn;
@@ -17,7 +17,6 @@ function getDaftarKelas($guru_id)
   $query = "SELECT id_kelas, tingkat, nama_kelas FROM kelas";
   return mysqli_query($conn, $query);
 }
-
 
 // Fungsi untuk mengambil daftar siswa berdasarkan kelas
 function getDaftarSiswa($kelas_id)
@@ -68,37 +67,40 @@ function simpanPelanggaran($data)
 }
 
 // Fungsi untuk mengambil riwayat pelanggaran dengan nama guru wali
-function getRiwayatPelanggaran()
+function getRiwayatPelanggaran($nama_siswa = '', $kelas = '')
 {
   global $conn;
-  $query = "SELECT 
-            s.nama_lengkap AS nama_siswa,
-            CONCAT(k.tingkat, ' ', k.nama_kelas) AS nama_kelas, -- Menambahkan tingkat
-            IFNULL(g.nama_lengkap, 'Tidak Ada Guru Wali') AS nama_guru_wali,
-            p.poin AS poin_terbaru,
-            p.tanggal_pelanggaran,
-            p.deskripsi,
-            (
-                SELECT SUM(p2.poin) 
-                FROM pelanggaran p2
-                WHERE p2.siswa_id = s.id_siswa
-            ) AS total_poin
-        FROM pelanggaran p
-        JOIN siswa s ON p.siswa_id = s.id_siswa
-        JOIN kelas k ON p.id_kelas = k.id_kelas
-        LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru
-        ORDER BY p.tanggal_pelanggaran DESC";
-
-  $result = mysqli_query($conn, $query);
-
-  if (!$result) {
-    die("Query Error: " . mysqli_error($conn));
+  $conditions = [];
+  if ($nama_siswa) {
+    $nama_siswa = mysqli_real_escape_string($conn, $nama_siswa);
+    $conditions[] = "s.nama_lengkap LIKE '%$nama_siswa%'";
+  }
+  if ($kelas) {
+    $conditions[] = "k.id_kelas = '$kelas'";
   }
 
-  return $result;
+  $where_clause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+  $query = "SELECT 
+                s.nama_lengkap AS nama_siswa,
+                CONCAT(k.tingkat, ' ', k.nama_kelas) AS nama_kelas,
+                IFNULL(g.nama_lengkap, 'Tidak Ada Guru Wali') AS nama_guru_wali,
+                p.poin AS poin_terbaru,
+                p.tanggal_pelanggaran,
+                p.deskripsi,
+                (
+                    SELECT SUM(p2.poin) 
+                    FROM pelanggaran p2
+                    WHERE p2.siswa_id = s.id_siswa
+                ) AS total_poin
+              FROM pelanggaran p
+              JOIN siswa s ON p.siswa_id = s.id_siswa
+              JOIN kelas k ON p.id_kelas = k.id_kelas
+              LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru
+              $where_clause
+              ORDER BY p.tanggal_pelanggaran DESC";
+
+  return mysqli_query($conn, $query);
 }
-
-
 
 // Proses penyimpanan pelanggaran
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_pelanggaran'])) {
@@ -113,6 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_pelanggaran']))
 
 // Variabel untuk menyimpan pilihan
 $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
+$nama_siswa = isset($_POST['nama_siswa']) ? $_POST['nama_siswa'] : '';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -165,37 +169,37 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
             </select>
           </div>
 
-            <div class="mb-4">
-              <label for="siswa" class="block text-sm font-semibold mb-2">Siswa</label>
-              <select id="siswa" name="siswa" class="w-full p-2 border border-gray-300 rounded" required>
-                <option value="">Pilih Siswa</option>
-                <?php
-                $siswa_list = getDaftarSiswa($selected_kelas);
-                while ($row = mysqli_fetch_assoc($siswa_list)) {
-                  echo "<option value='" . $row['nis'] . "'>" . $row['nama_lengkap'] . "</option>";
-                }
-                ?>
-              </select>
-            </div>
+          <div class="mb-4">
+            <label for="siswa" class="block text-sm font-semibold mb-2">Siswa</label>
+            <select id="siswa" name="siswa" class="w-full p-2 border border-gray-300 rounded" required>
+              <option value="">Pilih Siswa</option>
+              <?php
+              $siswa_list = getDaftarSiswa($selected_kelas);
+              while ($row = mysqli_fetch_assoc($siswa_list)) {
+                echo "<option value='" . $row['nis'] . "'>" . $row['nama_lengkap'] . "</option>";
+              }
+              ?>
+            </select>
+          </div>
 
-            <div class="mb-4">
-              <label for="deskripsi" class="block text-sm font-semibold mb-2">Deskripsi Pelanggaran</label>
-              <textarea id="deskripsi" name="deskripsi" rows="4" class="w-full p-2 border border-gray-300 rounded" required></textarea>
-            </div>
+          <div class="mb-4">
+            <label for="deskripsi" class="block text-sm font-semibold mb-2">Deskripsi Pelanggaran</label>
+            <textarea id="deskripsi" name="deskripsi" rows="4" class="w-full p-2 border border-gray-300 rounded" required></textarea>
+          </div>
 
-            <div class="mb-4">
-              <label for="poin" class="block text-sm font-semibold mb-2">Poin Pelanggaran</label>
-              <input type="number" id="poin" name="poin" class="w-full p-2 border border-gray-300 rounded" required min="1">
-            </div>
+          <div class="mb-4">
+            <label for="poin" class="block text-sm font-semibold mb-2">Poin Pelanggaran</label>
+            <input type="number" id="poin" name="poin" class="w-full p-2 border border-gray-300 rounded" required min="1">
+          </div>
 
-            <div class="mb-4">
-              <label for="tanggal" class="block text-sm font-semibold mb-2">Tanggal Pelanggaran</label>
-              <input type="date" id="tanggal" name="tanggal" class="w-full p-2 border border-gray-300 rounded" required value="<?php echo date('Y-m-d'); ?>">
-            </div>
+          <div class="mb-4">
+            <label for="tanggal" class="block text-sm font-semibold mb-2">Tanggal Pelanggaran</label>
+            <input type="date" id="tanggal" name="tanggal" class="w-full p-2 border border-gray-300 rounded" required value="<?php echo date('Y-m-d'); ?>">
+          </div>
 
-            <div class="text-right">
-              <button type="submit" name="simpan_pelanggaran" class="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700">Simpan Pelanggaran</button>
-            </div>
+          <div class="text-right">
+            <button type="submit" name="simpan_pelanggaran" class="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700">Simpan Pelanggaran</button>
+          </div>
         </form>
       </div>
 
@@ -203,23 +207,21 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
       <div class="w-2/3 bg-white shadow-md rounded-lg p-6">
         <h2 class="text-2xl font-bold text-center mb-6">Daftar Pelanggaran</h2>
 
-        <!-- filter -->
-        <form action="" method="POST">
-          <div class="mb-4">  
-            <label for="kelas" class="block text-sm font-semibold mb-2">Kelas</label>
-            <select id="kelas" name="kelas" class="w-full p-2 border border-gray-300 rounded" required onchange="this.form.submit()">
-              <option value="">Pilih Kelas</option>
-              <?php
-              $kelas_list = getDaftarKelas($_SESSION['guru_id']);
-              while ($row = mysqli_fetch_assoc($kelas_list)) {
-                $selected = ($selected_kelas == $row['id_kelas']) ? 'selected' : '';
-                echo "<option value='" . $row['id_kelas'] . "' $selected>" . $row["tingkat"] . " " . $row["nama_kelas"] . "</option>";
-              }
-              ?>
-            </select>
-          </div>
-          </form>
-
+        <!-- Filter untuk Riwayat Pelanggaran -->
+        <form method="POST" class="flex items-center space-x-4 mb-6">
+          <input type="text" name="nama_siswa" placeholder="Cari siswa..." value="<?= htmlspecialchars($nama_siswa); ?>" class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out">
+          <select name="kelas" class="border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out">
+            <option value="">Semua Kelas</option>
+            <?php
+            $kelas_list = getDaftarKelas($_SESSION['guru_id']);
+            while ($kelas = mysqli_fetch_assoc($kelas_list)) {
+              $selected = isset($_POST['kelas']) && $_POST['kelas'] == $kelas['id_kelas'] ? 'selected' : '';
+              echo "<option value='{$kelas['id_kelas']}' $selected>{$kelas['tingkat']} {$kelas['nama_kelas']}</option>";
+            }
+            ?>
+          </select>
+          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-600 transition duration-200 ease-in-out">Filter</button>
+        </form>
 
         <table class="table-auto w-full text-left border-collapse border border-gray-300">
           <thead>
@@ -236,43 +238,19 @@ $selected_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
           </thead>
           <tbody>
             <?php
-            $riwayat = getRiwayatPelanggaran();
+            $riwayat = getRiwayatPelanggaran($nama_siswa, $selected_kelas);
             $no = 1;
             while ($row = mysqli_fetch_assoc($riwayat)) {
-              // Jika ada kelas yang dipilih, filter berdasarkan kelas tersebut
-              if (!empty($_POST['kelas'])) {
-                $selected_kelas = $_POST['kelas'];
-                $kelas_result = getDaftarKelasPercabangan($selected_kelas);
-                $kelas_data = mysqli_fetch_assoc($kelas_result);
-
-                // Bandingkan dengan format yang sama (tingkat + nama_kelas)
-                $selected_kelas_name = $kelas_data['tingkat'] . ' ' . $kelas_data['nama_kelas'];
-
-                // Hanya tampilkan jika kelas sesuai
-                if ($row['nama_kelas'] === $selected_kelas_name) {
-                  echo "<tr>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['deskripsi'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
-                  echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";
-                  echo "</tr>";
-                }
-              } else {
-                // Jika tidak ada kelas yang dipilih, tampilkan semua data
-                echo "<tr>";
-                echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
-                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
-                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
-                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
-                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
-                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
-                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";
-                echo "</tr>";
-              }
+              echo "<tr>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['deskripsi'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
+              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";
+              echo "</tr>";
             }
             ?>
           </tbody>
