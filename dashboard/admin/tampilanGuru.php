@@ -115,6 +115,9 @@ $count = 1;
         <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded">Cari</button>
       </form>
 
+      <!-- Link untuk Cetak Data Guru -->
+      <a href="cetakDataGuru.php" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-700 mb-4 inline-block">Cetak Data Guru</a>
+
       <!-- Tambah Guru -->
       <a href="createGuru.php" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Tambah Guru</a>
       <a href="showClass.php" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">Tampilkan Kelas</a>
@@ -161,7 +164,7 @@ $count = 1;
                       <?php endwhile; ?>
                     </select>
                   </td>
-                  <td class="py-4 py-7 ">
+                  <td class="py-4 py-7">
                     <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Simpan</button>
                     <a href="javascript:void(0)" onclick="confirmDelete('deleteGuru.php?id=<?= $row['id_guru'] ?>')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Hapus</a>
                   </td>
@@ -173,8 +176,7 @@ $count = 1;
       </div>
     </main>
   </div>
- <?php include '../../layout/footer.php'; ?>
-
+  <?php include '../../layout/footer.php'; ?>
 </body>
 
 </html>

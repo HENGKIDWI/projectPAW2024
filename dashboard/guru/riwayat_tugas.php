@@ -137,8 +137,7 @@ if (isset($_POST['delete_id'])) {
                                     </a>"
                                     : "Tidak ada URL") .
                                 "</td>";
-                            echo "<td class='py-2 px-4 border text-center'>" . htmlspecialchars($row['poin']) . "</td>";
-                            echo "<td class='py-2 px-4 border text-center'>" . htmlspecialchars($kelas_info) . "</td>";
+                            echo "<td class='py-2 px-4 border text-center'>" . htmlspecialchars($row['poin'] ?? '-') . "</td>";                            echo "<td class='py-2 px-4 border text-center'>" . htmlspecialchars($kelas_info) . "</td>";
                             echo "<td class='py-2 px-4 border'>" . htmlspecialchars($row['deadline']) . "</td>";
                             echo "<td class='px-6 py-4'>";
                             echo "<div class='flex space-x-2'>";

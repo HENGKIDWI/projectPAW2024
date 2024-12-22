@@ -56,9 +56,28 @@ if (isset($_GET['id_siswa'])) {
     }
 }
 
-// Query untuk mengambil semua kelas
-$query_kelas = "SELECT * FROM kelas ORDER BY tingkat, nama_kelas";
+// Get the current class count for each class
+$query_class_counts = "SELECT kelas_id, COUNT(*) as siswa_count 
+                      FROM siswa 
+                      GROUP BY kelas_id";
+$result_class_counts = mysqli_query($conn, $query_class_counts);
+$class_counts = [];
+while ($count = mysqli_fetch_assoc($result_class_counts)) {
+    $class_counts[$count['kelas_id']] = $count['siswa_count'];
+}
+
+// Modified query for kelas to include the count
+$query_kelas = "SELECT k.*, 
+                (SELECT COUNT(*) FROM siswa s WHERE s.kelas_id = k.id_kelas) as siswa_count 
+                FROM kelas k 
+                ORDER BY k.tingkat, k.nama_kelas";
 $result_kelas = mysqli_query($conn, $query_kelas);
+
+// Store class data in array
+$kelas_data = [];
+while ($kelas = mysqli_fetch_assoc($result_kelas)) {
+    $kelas_data[] = $kelas;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -108,13 +127,28 @@ $result_kelas = mysqli_query($conn, $query_kelas);
             <div class="mb-4">
                 <label for="kelas_id" class="block text-gray-700 font-bold mb-2">Kelas:</label>
                 <select name="kelas_id" id="kelas_id" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300" required>
-                    <?php while ($kelas = mysqli_fetch_assoc($result_kelas)): ?>
+                    <?php foreach ($kelas_data as $kelas): 
+                        $is_full = $kelas['siswa_count'] >= 32;
+                        $current_class = $kelas['id_kelas'] == $siswa['kelas_id'];
+                        $disabled = $is_full && !$current_class ? 'disabled' : '';
+                        $class_text = $is_full ? ' (PENUH - 32/32 siswa)' : ' (' . $kelas['siswa_count'] . '/32 siswa)';
+                    ?>
                         <option value="<?php echo $kelas['id_kelas']; ?>" 
-                                <?php echo ($kelas['id_kelas'] == $siswa['kelas_id']) ? 'selected' : ''; ?>>
-                            <?php echo $kelas['nama_kelas']; ?> (<?php echo $kelas['tingkat']; ?>)
+                                <?php echo $current_class ? 'selected' : ''; ?>
+                                <?php echo $disabled; ?>
+                                <?php echo $is_full ? 'class="text-gray-400"' : ''; ?>>
+                            <?php echo $kelas['nama_kelas']; ?> 
+                            (<?php echo $kelas['tingkat']; ?>)
+                            <?php echo $class_text; ?>
                         </option>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </select>
+                <?php if (isset($kelas['siswa_count']) && $kelas['siswa_count'] >= 32): ?>
+                    <p class="text-red-500 text-sm mt-1">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Kelas ini sudah penuh (maksimal 32 siswa)
+                    </p>
+                <?php endif; ?>
             </div>
 
             <div class="mb-4">
@@ -156,6 +190,31 @@ $result_kelas = mysqli_query($conn, $query_kelas);
             <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300">Simpan Perubahan</button>
         </form>
     </div>
- <?php include '../../layout/footer.php'; ?>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const kelasSelect = document.getElementById('kelas_id');
+        
+        // Style disabled options
+        Array.from(kelasSelect.options).forEach(option => {
+            if (option.disabled) {
+                option.style.backgroundColor = '#f3f4f6';
+                option.style.color = '#9ca3af';
+            }
+        });
+
+        // Add warning if selecting a full class
+        kelasSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.text.includes('PENUH')) {
+                alert('Perhatian: Kelas ini sudah penuh (32 siswa). Silakan pilih kelas lain.');
+                // Reset to previous selection if needed
+                this.value = '<?php echo $siswa['kelas_id']; ?>';
+            }
+        });
+    });
+    </script>
+
+    <?php include '../../layout/footer.php'; ?>
 </body>
 </html>

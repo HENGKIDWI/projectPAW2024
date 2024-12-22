@@ -133,8 +133,8 @@ if (isset($_POST["buat"])) {
                   echo "<td class='px-4 py-2 border-b'>" . $row['jam_mulai'] . " - " . $row['jam_selesai'] . "</td>";
                   echo "<td class='px-4 py-2 border-b'>" . $row['tempat_kegiatan'] . "</td>";
                   echo "<td class='px-4 py-2 border-b'>";
-                  echo "<a href='edit_kelas.php?id=" . $row['id_ekstrakurikuler'] . "' class='text-yellow-500 hover:underline'>Edit</a> | ";
-                  echo "<a href='hapus_kelas.php?id=" . $row['id_ekstrakurikuler'] . "' class='text-red-500 hover:underline' onclick='return confirm(\"Apakah Anda yakin ingin menghapus kelas ini?\");'>Hapus</a>";
+                  echo "<a href='edit_kelasMinat.php?id=" . $row['id_ekstrakurikuler'] . "' class='text-yellow-500 hover:underline'>Edit</a> | ";
+                  echo "<a href='hapus_kelasMinat.php?id=" . $row['id_ekstrakurikuler'] . "' class='text-red-500 hover:underline' onclick='return confirm(\"Apakah Anda yakin ingin menghapus kelas ini?\");'>Hapus</a>";
                   echo "</td>";
                   echo "</tr>";
               }

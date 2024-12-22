@@ -186,8 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["update_absensi"])) {
 
                     <div class="mt-4 flex justify-end gap-4">
                         <a href="input_absen.php" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500" id="kembali">Kembali</a>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 " id='cetak' onclick="window.print()">Cetak</button>
-                        <button type="submit" name="update_absensi" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" id="perbarui">Perbarui Absensi</button>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" id="cetak" onclick="window.print()">Cetak</button>                        <button type="submit" name="update_absensi" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" id="perbarui">Perbarui Absensi</button>
                     </div>
                 </form>
             <?php else: ?>

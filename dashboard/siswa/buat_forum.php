@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $mata_pelajaran_id = $_POST['mata_pelajaran_id'];
     $judul = $_POST['judul'];
     $deskripsi = $_POST['deskripsi'];
-    $dibuat_oleh = $row['id_siswa']; // Ambil ID siswa dari session
+    $dibuat_oleh = $row['id_siswa']; 
 
     $query = "INSERT INTO forum (mata_pelajaran_id, judul, deskripsi, dibuat_oleh) VALUES (?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $query);

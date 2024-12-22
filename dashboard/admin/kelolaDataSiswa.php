@@ -6,7 +6,11 @@ if (!isset($_SESSION['nama_lengkap'])) {
     header("Location: ../../login.php");
     exit;
 }
-
+if (isset($_SESSION['message'])) {
+    echo "<script>alert('" . $_SESSION['message'] . "');</script>";
+    // Clear the session message after displaying it
+    unset($_SESSION['message']);
+}
 // Filter berdasarkan GET parameter
 $filter_tingkat = isset($_GET['tingkat']) ? $_GET['tingkat'] : '';
 $filter_kelas = isset($_GET['id_kelas']) ? $_GET['id_kelas'] : '';
@@ -78,6 +82,14 @@ $result_kelas = mysqli_query($conn, $query_kelas);
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        /* CSS untuk tombol yang dinonaktifkan */
+        a.disabled {
+            pointer-events: none;
+            opacity: 0.6; 
+        }
+
+    </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
     <?php if (isset($_SESSION['message'])): ?>
@@ -125,6 +137,12 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                         class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition duration-300">
                         <i class="fas fa-trash-alt mr-2"></i> Hapus Kelas
                     </button>
+                    <!-- Button untuk memunculkan pop-up Edit -->
+                    <button data-toggle="modal" data-target="#editKelasModal" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition duration-300">
+                        <i class="fas fa-edit mr-2"></i> Edit Kelas
+                    </button>
+
 
                 </div>
             </div>
@@ -158,6 +176,22 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                         <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-md">Filter</button>
                     </div>
                 </form>
+                <!-- Tombol untuk mencetak berdasarkan kelas -->
+                <a id="btnCetakKelas" href="cetakDataSiswa.php?tingkat=<?php echo $filter_tingkat; ?>&id_kelas=<?php echo $filter_kelas; ?>" 
+                   target="_blank" 
+                   class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition duration-300 disabled:opacity-50"
+                   <?php echo empty($filter_kelas) ? 'disabled' : ''; ?>>
+                   <i class="fas fa-print"></i> Cetak Data <?php echo $judul; ?>
+                </a>
+
+                <!-- Tombol untuk mencetak seluruh data siswa -->
+                <a id="btnCetakSeluruh" href="cetakDataSiswaSeluruh.php" 
+                   target="_blank" 
+                   class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition duration-300">
+                   <i class="fas fa-print"></i> Cetak Semua Data Siswa
+                </a>
+
+
 
             </div>
             <!-- Data Siswa  -->
@@ -209,6 +243,54 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Kelas -->
+<div class="modal fade" id="editKelasModal" tabindex="-1" aria-labelledby="editKelasModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editKelasModalLabel">Edit Kelas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="kelolaDataSiswaEditKelas.php" method="POST">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="id_kelas">Pilih Kelas</label>
+                        <select class="form-control" id="id_kelas" name="id_kelas" required>
+                            <option value="">-- Pilih Kelas --</option>
+                            <?php
+                            // Query untuk mendapatkan daftar kelas
+                            $query_kelas = "SELECT id_kelas, nama_kelas, tingkat FROM kelas ORDER BY tingkat, nama_kelas";
+                            $result_kelas = mysqli_query($conn, $query_kelas);
+                            while ($kelas = mysqli_fetch_assoc($result_kelas)) {
+                                echo "<option value='" . $kelas['id_kelas'] . "'>" . htmlspecialchars($kelas['tingkat']) . " - " . htmlspecialchars($kelas['nama_kelas']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nama_kelas">Nama Kelas Baru</label>
+                        <input type="text" class="form-control" id="nama_kelas" name="nama_kelas" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tingkat">Tingkat Baru</label>
+                        <select class="form-control" id="tingkat" name="tingkat" required>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -299,6 +381,18 @@ $result_kelas = mysqli_query($conn, $query_kelas);
             window.location.href = 'kelolaDataSiswaHapus.php?id_siswa=' + id_siswa;
         }
     }
+        // Menonaktifkan tombol cetak berdasarkan filter kelas
+        const filterKelas = '<?php echo $filter_kelas; ?>';
+        const btnCetakKelas = document.getElementById('btnCetakKelas');
+        
+        // Jika filter kelas kosong, nonaktifkan tombol
+        if (!filterKelas) {
+            btnCetakKelas.classList.add('disabled');
+            btnCetakKelas.setAttribute('disabled', 'true');
+        } else {
+            btnCetakKelas.classList.remove('disabled');
+            btnCetakKelas.removeAttribute('disabled');
+        }
 </script>
 
 <?php mysqli_close($conn); ?>

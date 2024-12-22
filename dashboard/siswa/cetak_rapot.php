@@ -144,11 +144,11 @@ $result_rapor = mysqli_query($conn, $query_rapor);
     </div>
 </div>
 
-    <div class="mt-6">
-        <button onclick="window.print()" class="py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200 no-print">
-            Cetak Rapor
-        </button>
-    </div>
+<div class="mt-6">
+    <button onclick="window.print()" class="py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200 no-print">
+        Cetak Rapor
+    </button>
+</div>
     </div>
 
     <footer class="bg-blue-600 text-white py-4 mt-6">

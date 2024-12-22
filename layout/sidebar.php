@@ -40,7 +40,8 @@
             elseif ($_SESSION['role'] == 'murid') {
                 echo '<a href="../../dashboard/siswa/index.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-tachometer-alt mr-2"></i>Dashbroad</a>';
                 echo '<a href="../../dashboard/siswa/cetak_rapor.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-file-alt mr-2"></i>Cetak Rapot</a>';
-                echo '<a href="../../dashboard/siswa/forum_diskusi.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-comments mr-2"></i>Forum Diskusi</a>';
+                echo '<a href="../../dashboard/siswa/forum.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-comments mr-2"></i>Forum Diskusi</a>';
+                echo '<a href="../../dashboard/siswa/materi_pembelajaran.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-book-open mr-2"></i>Materi Pembelajaran</a>';
                 echo '<a href="../../dashboard/siswa/bank_soal.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-folder-open mr-2"></i>Bank Soal</a>';
                 echo '<a href="../../dashboard/siswa/informasi.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-bullhorn mr-2"></i>Informasi/Pengumuman</a>';
                 echo '<a href="../../dashboard/siswa/transkrip_nilai.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-file-alt mr-2"></i>Transkip Nilai</a>';
@@ -49,6 +50,7 @@
                 echo '<a href="../../dashboard/siswa/evaluasi_guru.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-star mr-2"></i>Evaluasi Guru</a>';
                 echo '<a href="../../dashboard/siswa/tugas.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-tasks mr-2"></i>Tugas</a>';
                 echo '<a href="../../dashboard/siswa/konseling.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-user-friends mr-2"></i>Konseling</a>';
+                echo '<a href="../../dashboard/siswa/informasi_strukturKelas.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-sitemap mr-2"></i></i>Informasi Struktural Kelas</a>';
                 echo '<a href="../../dashboard/siswa/about_view.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-school mr-2"></i>Profil Sekolah</a>';
             }
         } else {

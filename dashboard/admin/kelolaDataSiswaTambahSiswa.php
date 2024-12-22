@@ -36,6 +36,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </script>";
         exit;
     }
+    // Cek apakah kelas sudah penuh
+    $kelas_capacity_check = mysqli_query($conn, "SELECT COUNT(*) AS jumlah_siswa 
+    FROM siswa WHERE kelas_id = '$kelas_id'");
+    $kelas_data = mysqli_fetch_assoc($kelas_capacity_check);
+
+    if ($kelas_data['jumlah_siswa'] >= 32) {
+        echo "<script>
+        alert('Kelas yang dipilih sudah penuh. Silakan pilih kelas lain.');
+        window.location.href = 'kelolaDataSiswaTambah.php';
+        </script>";
+        exit;
+    }
 
     // Query untuk memasukkan data
     $query = "INSERT INTO siswa (nama_lengkap, nis, alamat, tanggal_lahir, jenis_kelamin, kelas_id, no_telp, username, password) 
@@ -76,6 +88,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById("username").value = nisn;
             document.getElementById("password").value = nisn;
         }
+
+        function checkClassCapacity() {
+            const kelasSelect = document.getElementById("kelas_id");
+            const selectedOption = kelasSelect.options[kelasSelect.selectedIndex];
+            
+            // Jika kelas penuh, tampilkan notifikasi
+            if (selectedOption.text.includes("PENUH")) {
+                alert("Kelas ini sudah penuh (32 siswa). Silakan pilih kelas lain.");
+                kelasSelect.value = ""; // Reset pilihan ke default
+            }
+        }
+
+        // Style disabled options on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const kelasSelect = document.getElementById('kelas_id');
+            
+            Array.from(kelasSelect.options).forEach(option => {
+                if (option.disabled) {
+                    option.style.backgroundColor = '#f3f4f6';
+                    option.style.color = '#9ca3af';
+                }
+            });
+        });
     </script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -126,21 +161,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="kelas_id">Kelas</label>
-                <select name="kelas_id" id="kelas_id" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <select name="kelas_id" onchange="checkClassCapacity()" id="kelas_id" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="">Pilih Kelas</option>
                     <?php
                     // Query untuk mendapatkan semua kelas dan jumlah siswa per kelas
                     $kelas_query = mysqli_query($conn, "SELECT k.id_kelas, k.tingkat, k.nama_kelas, 
-                                                        (SELECT COUNT(*) FROM siswa s WHERE s.kelas_id = k.id_kelas) AS jumlah_siswa
-                                                        FROM kelas k");
+                                                      (SELECT COUNT(*) FROM siswa s WHERE s.kelas_id = k.id_kelas) AS jumlah_siswa
+                                                      FROM kelas k
+                                                      ORDER BY k.tingkat, k.nama_kelas");
 
                     while ($row = mysqli_fetch_assoc($kelas_query)) {
-                        // Mengecek apakah jumlah siswa sudah 32
-                        $disabled = ($row['jumlah_siswa'] >= 32) ? 'disabled' : '';
-                        $label = $row['jumlah_siswa'] >= 32 ? ' - Kelas Penuh' : '';
-                        echo "<option value='{$row['id_kelas']}' $disabled>Tingkat {$row['tingkat']} - {$row['nama_kelas']}{$label}</option>";
+                        $is_full = $row['jumlah_siswa'] >= 32;
+                        $disabled = $is_full ? 'disabled' : '';
+                        $capacity_text = $is_full ? 
+                                       " (PENUH - 32/32 siswa)" : 
+                                       " (" . $row['jumlah_siswa'] . "/32 siswa)";
+                        
+                        echo "<option value='{$row['id_kelas']}' $disabled " . 
+                             ($is_full ? "class='text-gray-400'" : "") . ">
+                             Tingkat {$row['tingkat']} - {$row['nama_kelas']}{$capacity_text}
+                             </option>";
                     }
                     ?>
                 </select>
+                <small class="text-gray-600">Maksimal 32 siswa per kelas</small>
             </div>
 
             <!-- Username and Password (readonly, auto-filled) -->

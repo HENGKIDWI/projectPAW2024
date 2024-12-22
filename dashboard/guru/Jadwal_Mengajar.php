@@ -10,15 +10,25 @@ if (!isset($_SESSION['nama_lengkap'])) {
 // Mengambil ID guru yang sedang login dari session
 $guru_id = $_SESSION['guru_id'];
 
-// Fungsi untuk mengambil jadwal mengajar berdasarkan guru_id
-function getJadwalMengajar($guru_id) {
+// Variabel filter yang digunakan
+$filter_hari = isset($_POST['hari']) ? $_POST['hari'] : '';
+
+// Fungsi untuk mengambil jadwal mengajar berdasarkan guru_id dan filter hari
+function getJadwalMengajar($guru_id, $filter_hari) {
     global $conn;
+
+    // Membuat query dengan filter hari
     $query = "SELECT j.id_jadwal, j.hari, j.jam_mulai, j.jam_selesai, mp.nama_pelajaran, k.nama_kelas, k.tingkat
               FROM jadwal AS j
               JOIN mata_pelajaran AS mp ON j.mata_pelajaran_id = mp.id_mata_pelajaran
               JOIN kelas AS k ON j.kelas_id = k.id_kelas
-              WHERE j.guru_id = '$guru_id'
-              ORDER BY j.hari, j.jam_mulai";
+              WHERE j.guru_id = '$guru_id'";
+
+    if ($filter_hari != '') {
+        $query .= " AND j.hari = '$filter_hari'";
+    }
+
+    $query .= " ORDER BY j.hari, j.jam_mulai";
 
     return mysqli_query($conn, $query);
 }
@@ -48,6 +58,25 @@ $nama_guru = $_SESSION['nama_lengkap'];
 
     <!-- Tabel Jadwal Mengajar -->
     <div class="bg-white shadow-md rounded-lg p-6 overflow-x-auto">
+      <!-- Filter Form -->
+      <form method="POST" action="" class="mb-6">
+        <div class="flex items-center space-x-4">
+          <div>
+            <select name="hari" id="hari" class="p-2 border rounded w-40">
+              <option value="" selected disabled>-- Pilih Hari --</option>
+              <option value="Senin" <?php echo $filter_hari == 'Senin' ? 'selected' : ''; ?>>Senin</option>
+              <option value="Selasa" <?php echo $filter_hari == 'Selasa' ? 'selected' : ''; ?>>Selasa</option>
+              <option value="Rabu" <?php echo $filter_hari == 'Rabu' ? 'selected' : ''; ?>>Rabu</option>
+              <option value="Kamis" <?php echo $filter_hari == 'Kamis' ? 'selected' : ''; ?>>Kamis</option>
+              <option value="Jumat" <?php echo $filter_hari == 'Jumat' ? 'selected' : ''; ?>>Jumat</option>
+              <option value="Sabtu" <?php echo $filter_hari == 'Sabtu' ? 'selected' : ''; ?>>Sabtu</option>
+            </select>
+          </div>
+          <div>
+            <button type="submit" class="bg-blue-600 text-white p-2 rounded w-32">Filter</button>
+          </div>
+        </div>
+      </form>
       <table class="table-auto w-full text-left border-collapse border border-gray-300">
         <thead>
           <tr>
@@ -60,7 +89,7 @@ $nama_guru = $_SESSION['nama_lengkap'];
         </thead>
         <tbody>
           <?php
-          $result = getJadwalMengajar($guru_id);
+          $result = getJadwalMengajar($guru_id, $filter_hari);
           if (mysqli_num_rows($result) > 0) {
             $no = 1;
             while ($row = mysqli_fetch_assoc($result)) {
@@ -73,7 +102,7 @@ $nama_guru = $_SESSION['nama_lengkap'];
               echo "</tr>";
             }
           } else {
-              echo "<tr><td colspan='6' class='px-4 py-2 border border-gray-300 text-center'>Tidak ada jadwal mengajar untuk saat ini.</td></tr>";
+              echo "<tr><td colspan='5' class='px-4 py-2 border border-gray-300 text-center'>Tidak ada jadwal mengajar untuk saat ini.</td></tr>";
           }
           ?>
         </tbody>

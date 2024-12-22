@@ -36,6 +36,14 @@ $jadwal_result = mysqli_query($conn, $jadwal_query);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Siswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    @media print {
+        button {
+            display: none;
+        }
+    }
+</style>
+
 </head>
 <body class="bg-gray-50 text-gray-800">
     <!-- Sidebar -->
@@ -59,7 +67,7 @@ $jadwal_result = mysqli_query($conn, $jadwal_query);
         <div class="bg-white shadow-lg rounded-lg p-6">
             <table class="table-auto w-full border-collapse border border-gray-200">
                 <thead>
-                    <tr class="bg-pink-100">
+                    <tr class="bg-blue-200">
                         <th class="border border-gray-300 px-4 py-2">No</th>
                         <th class="border border-gray-300 px-4 py-2">Hari</th>
                         <th class="border border-gray-300 px-4 py-2">Mata Pelajaran</th>

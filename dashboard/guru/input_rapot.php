@@ -166,13 +166,14 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
                             <td class="border border-gray-300 px-4 py-2"><?php echo $row['catatan_wali']; ?></td>
                             <td class="border border-gray-300 px-4 py-2">
                                 <a href="edit_rapor.php?id_rapor=<?php echo $row['id_rapot']; ?>" class="text-blue-600">Edit</a> | 
-                                <a href="hapus_rapor.php?id_rapor=<?php echo $row['id_rapot']; ?>" class="text-red-600" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">Hapus</a>
+                                <a href="hapus_rapor.php?id_rapor=<?php echo $row['id_rapot']; ?>" class="text-red-600" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">Hapus</a> | 
+                                <a href="cetak_rapor.php?id_rapor=<?php echo $row['id_rapot']; ?>" class="text-green-600">Cetak</a>
                             </td>
                         </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" class="text-center text-gray-500 py-4">Belum ada data rapor yang diinput.</td>
+                        <td colspan="9" class="text-center text-gray-500 py-4">Belum ada data rapor yang diinput.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

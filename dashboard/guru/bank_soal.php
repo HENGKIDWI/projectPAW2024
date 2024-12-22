@@ -129,11 +129,11 @@ $selectedKelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                                     echo "<td class='px-6 py-4'>{$row['mata_pelajaran']}</td>";
                                     echo "<td class='px-6 py-4'>{$row['kelas']}</td>";
                                     echo "<td class='px-6 py-4'>" . 
-                                    ($row['file_soal'] ? "<a href='uploads/soal/{$row['file_soal']}' target='_blank' class='text-blue-600 hover:underline'>Unduh Soal</a>" : '-') . 
-                                "</td>";                                    echo "<td class='px-6 py-4'>" . ($row['url_soal'] ? "<a href='{$row['url_soal']}' target='_blank' class='text-blue-600 hover:underline'>Lihat Soal</a>" : '-') . "</td>";
+                                    ($row['file_soal'] ? "<a href='uploads/soal/{$row['file_soal']}' target='_blank' class='text-blue-600 hover:underline'>File Soal</a>" : '-') . 
+                                "</td>";                                    echo "<td class='px-6 py-4'>" . ($row['url_soal'] ? "<a href='{$row['url_soal']}' target='_blank' class='text-blue-600 hover:underline'>Url Soal</a>" : '-') . "</td>";
                                 echo "<td class='px-6 py-4'>" . 
-                                ($row['file_jawaban'] ? "<a href='uploads/jawaban/{$row['file_jawaban']}' target='_blank' class='text-blue-600 hover:underline'>Unduh Jawaban</a>" : '-') . 
-                            "</td>";                                    echo "<td class='px-6 py-4'>" . ($row['url_jawaban'] ? "<a href='{$row['url_jawaban']}' target='_blank' class='text-blue-600 hover:underline'>Lihat Jawaban</a>" : '-') . "</td>";
+                                ($row['file_jawaban'] ? "<a href='uploads/jawaban/{$row['file_jawaban']}' target='_blank' class='text-blue-600 hover:underline'>File Jawaban</a>" : '-') . 
+                            "</td>";                                    echo "<td class='px-6 py-4'>" . ($row['url_jawaban'] ? "<a href='{$row['url_jawaban']}' target='_blank' class='text-blue-600 hover:underline'>Url Jawaban</a>" : '-') . "</td>";
                                     echo "<td class='px-6 py-4'>";
                                     echo "<div class='flex space-x-2'>";
                                     echo "<a href='edit_bank_soal.php?id={$row['id']}' class='text-blue-600 hover:text-blue-800'>Edit</a>";

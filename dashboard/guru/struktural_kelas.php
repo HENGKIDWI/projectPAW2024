@@ -59,12 +59,18 @@ if (isset($_POST["kirim"])) {
   if (!empty($kelas_id) && !empty($siswa_id) && !empty($jabatan)) {
       // Simpan data ke database
       if (tambahStrukturKelas($kelas_id, $siswa_id, $jabatan)) {
-          echo "<script>alert('Data struktur kelas berhasil ditambahkan!'); window.location.href='';</script>";
+          echo "<script>alert('Data struktur kelas berhasil ditambahkan!')</script>";
+          header("Location: struktural_kelas.php");
+          exit();
       } else {
           echo "<script>alert('Gagal menambahkan data struktur kelas.');</script>";
+          header("Location: struktural_kelas.php");
+          exit();
       }
   } else {
       echo "<script>alert('Harap isi semua kolom!');</script>";
+      header("Location: struktural_kelas.php");
+      exit();
   }
 }
 
@@ -187,8 +193,8 @@ $siswa_list = !empty($selectKelas) ? getDaftarSiswa($selectKelas) : [];
                 echo "<td class='px-4 py-2 text-sm'>" . $row['nama_lengkap'] . "</td>";
                 echo "<td class='px-4 py-2 text-sm'>" . $row['jabatan'] . "</td>";
                 echo "<td class='px-4 py-2 text-sm'>";
-                echo "<a href='edit_struktur.php?id=" . $row['id_struktural'] . "' class='text-yellow-500 hover:text-yellow-700 mr-2'>Edit</a>";
-                echo "<a href='hapus_struktur.php?id=" . $row['id_struktural'] . "' class='text-red-500 hover:text-red-700' onclick='return confirm(\"Apakah Anda yakin ingin menghapus data ini?\");'>Hapus</a>";
+                echo "<a href='edit_strukturKelas.php?id=" . $row['id_struktural'] . "' class='text-yellow-500 hover:text-yellow-700 mr-2'>Edit</a>";
+                echo "<a href='javascript:void(0);' class='text-red-500 hover:text-red-700' onclick=\"showConfirmationModal('hapus_strukturKelas.php?id=" . $row['id_struktural'] . "')\">Hapus</a>";
                 echo "</td>";
                 echo "</tr>";
               }
@@ -201,6 +207,43 @@ $siswa_list = !empty($selectKelas) ? getDaftarSiswa($selectKelas) : [];
       </div>
     </div>
   </div>
+
+  <!-- Modal Konfirmasi -->
+  <div id="confirmationModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h3 class="text-lg font-semibold text-gray-800">Konfirmasi Penghapusan</h3>
+        <p class="text-gray-700 mt-2">Apakah Anda yakin ingin menghapus data ini?</p>
+        <div class="flex justify-end mt-4">
+            <button id="cancelButton" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Batal</button>
+            <a id="confirmDelete" href="" class="ml-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Hapus</a>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    // Ambil elemen modal dan tombol-tombolnya
+    const confirmationModal = document.getElementById('confirmationModal');
+    const cancelButton = document.getElementById('cancelButton');
+    const confirmDelete = document.getElementById('confirmDelete');
+
+    // Fungsi untuk menampilkan modal
+    function showConfirmationModal(url) {
+        confirmationModal.classList.remove('hidden');
+        confirmDelete.href = url;
+    }
+
+    // Tombol batal untuk menutup modal
+    cancelButton.addEventListener('click', () => {
+        confirmationModal.classList.add('hidden');
+    });
+
+    // Tutup modal saat pengguna mengklik di luar modal
+    window.addEventListener('click', (e) => {
+        if (e.target === confirmationModal) {
+            confirmationModal.classList.add('hidden');
+        }
+    });
+  </script>
 
   <?php require_once "../../layout/footer.php" ?>
 </body>

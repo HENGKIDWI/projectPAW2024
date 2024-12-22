@@ -18,13 +18,14 @@ $siswa = mysqli_fetch_assoc($result);
 // Ambil kelas siswa
 $kelas_id = $siswa['kelas_id'];
 
-// Ambil tugas berdasarkan kelas dan mata pelajaran
+// Ambil tugas berdasarkan kelas
 $tugas_query = "
-    SELECT tugas.*, kelas.*
+    SELECT id_tugas, judul, kelas_id, deskripsi, deadline
     FROM tugas 
-    JOIN kelas ON tugas.kelas_id = kelas.id_kelas 
-    WHERE tugas.kelas_id = '" . mysqli_real_escape_string($conn, $kelas_id) . "'";
+    WHERE kelas_id = '" . mysqli_real_escape_string($conn, $kelas_id) . "'";
 $tugas_result = mysqli_query($conn, $tugas_query);
+
+$success_message = "";
 
 // Proses pengumpulan tugas
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -51,10 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $status_pengumpulan = ($tanggal_pengumpulan <= $deadline) ? "Tepat Waktu" : "Terlambat";
 
             // Insert ke tabel pengumpulan_tugas
-            $insert_query = "INSERT INTO pengumpulan_tugas (id_tugas, id_siswa, file_tugas, tanggal_pengumpulan, status_pengumpulan) 
-                             VALUES ('" . mysqli_real_escape_string($conn, $id_tugas) . "', '$id_siswa', '" . mysqli_real_escape_string($conn, $file_tugas) . "', '$tanggal_pengumpulan', '$status_pengumpulan')";
+            $insert_query = "INSERT INTO pengumpulan_tugas (id_tugas, id_siswa, file_tugas, tanggal_pengumpulan, status_pengumpulan, nilai) 
+                             VALUES ('" . mysqli_real_escape_string($conn, $id_tugas) . "', '$id_siswa', '" . mysqli_real_escape_string($conn, $file_tugas) . "', '$tanggal_pengumpulan', '$status_pengumpulan', NULL)";
             if (mysqli_query($conn, $insert_query)) {
-                echo "<script>alert('Tugas berhasil dikumpulkan!');</script>";
+                $success_message = "Tugas berhasil dikumpulkan!";
+
+                // Hapus tugas dari database
+                $delete_query = "DELETE FROM tugas WHERE id_tugas = '" . mysqli_real_escape_string($conn, $id_tugas) . "'";
+                mysqli_query($conn, $delete_query);
             } else {
                 echo "<script>alert('Gagal menyimpan ke database: " . mysqli_error($conn) . "');</script>";
             }
@@ -87,6 +92,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div id="mainContent" class="container mx-auto mt-8 px-4 transition-all duration-300">
         <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Halaman Pengumpulan Tugas</h2>
 
+        <!-- Notifikasi -->
+        <?php if (!empty($success_message)): ?>
+            <div class="bg-green-100 text-green-700 border border-green-400 px-4 py-3 rounded mb-4">
+                <?= $success_message; ?>
+            </div>
+        <?php endif; ?>
+
         <!-- Tugas List -->
         <div class="bg-white shadow-lg rounded-lg p-6">
             <table class="table-auto w-full border-collapse border border-gray-300">
@@ -94,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <tr>
                         <th class="border border-gray-300 px-4 py-2">No</th>
                         <th class="border border-gray-300 px-4 py-2">Judul Tugas</th>
-                        <th class="border border-gray-300 px-4 py-2">Mata Pelajaran</th> <!-- Kolom Mata Pelajaran -->
+                        <th class="border border-gray-300 px-4 py-2">Kelas</th>
                         <th class="border border-gray-300 px-4 py-2">Deskripsi</th>
                         <th class="border border-gray-300 px-4 py-2">Batas Waktu</th>
                         <th class="border border-gray-300 px-4 py-2">Aksi</th>
@@ -108,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             echo "<tr class='hover:bg-gray-100'>
                                 <td class='border border-gray-300 px-4 py-2 text-center'>{$no}</td>
                                 <td class='border border-gray-300 px-4 py-2'>{$tugas['judul']}</td>
-                                <td class='border border-gray-300 px-4 py-2'>{$tugas['nama_pelajaran']}</td>
+                                <td class='border border-gray-300 px-4 py-2'>{$tugas['kelas_id']}</td>
                                 <td class='border border-gray-300 px-4 py-2'>{$tugas['deskripsi']}</td>
                                 <td class='border border-gray-300 px-4 py-2 text-center'>{$tugas['deadline']}</td>
                                 <td class='border border-gray-300 px-4 py-2 text-center'>
