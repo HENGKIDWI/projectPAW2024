@@ -136,24 +136,24 @@ $html = <<<HTML
 
         .footer {
             text-align: center;
-            margin-top: 40px; /* Tambahkan jarak vertikal */
-            margin-bottom: 40px; /* Tambahkan jarak vertikal */
+            margin-top: 40px;
+            margin-bottom: 40px;
         }
 
         .footer td.left {
-            padding-right: 170px; /* Tambahkan jarak horizontal antar kolom */
-            padding-left: 60px; /* Tambahkan jarak horizontal antar kolom */
+            padding-right: 170px;
+            padding-left: 60px;
             vertical-align: top;
         }
 
         .footer td.right {
-            padding-left: 170px; /* Tambahkan jarak horizontal antar kolom */
-            padding-right: 60px; /* Tambahkan jarak horizontal antar kolom */
+            padding-left: 170px;
+            padding-right: 60px;
             vertical-align: top;
         }
 
         .footer-section {
-            margin-top: 10px; /* Tambahkan jarak vertikal antara elemen dalam setiap bagian */
+            margin-top: 10px;
         }
 
         .catatan-wali {
@@ -194,12 +194,16 @@ $html = <<<HTML
         <table class="nilai-table">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Mata Pelajaran</th>
-                    <th>Nilai Pengetahuan</th>
-                    <th>Predikat Pengetahuan</th>
-                    <th>Nilai Keterampilan</th>
-                    <th>Predikat Keterampilan</th>
+                    <th rowspan="2">No</th>
+                    <th rowspan="2">Mata Pelajaran</th>
+                    <th colspan="2">Pengetahuan</th>
+                    <th colspan="2">Keterampilan</th>
+                </tr>
+                <tr>
+                    <th>Nilai</th>
+                    <th>Predikat</th>
+                    <th>Nilai</th>
+                    <th>Predikat</th>
                 </tr>
             </thead>
             <tbody>

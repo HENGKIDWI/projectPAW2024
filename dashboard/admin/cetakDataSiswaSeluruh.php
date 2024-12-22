@@ -41,6 +41,11 @@ $html = "<html>
             margin: 0;
             text-align: center;
         }
+        .kop-surat .info h2 {
+            font-size: 16px;
+            margin: 0;
+            text-align: center;
+        }
         .kop-surat .info p {
             margin: 3px 0;
             font-size: 10px;
@@ -79,13 +84,14 @@ $html = "<html>
         <div class='logo'>
             <img src='https://i.pinimg.com/originals/e2/57/46/e257468b494f341546a8a30c47b023d6.png' alt='Logo Sekolah'>
         </div>
+    
         <div class='info'>
-          <h1>SMP NEGERI 1 TAMBELANGAN</h1>
+          <h1>Data Siswa</h1>
+          <h2>SMP NEGERI 1 TAMBELANGAN</h2>
           <p>Jl. Raya Tambelangan - Sampang 69253 Karang Anyar</p>
         </div>
     </div>
     <div class='garis'></div>
-    <h2>Data Seluruh Siswa</h2>
     <table class='table'>
         <thead>
             <tr>

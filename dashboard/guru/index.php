@@ -7,33 +7,69 @@ if (!isset($_SESSION['nama_lengkap'])) {
     exit;
 }
 
-// Fungsi untuk mengambil pengumuman terbaru
-function getPengumumanTerbaru() {
-    global $conn;
-    $result = mysqli_query($conn, "SELECT deskripsi FROM informasi ORDER BY tanggal_publikasi DESC LIMIT 1");
-    $data = mysqli_fetch_assoc($result);
-    return $data['deskripsi'] ?? "Tidak ada pengumuman terbaru.";
+// Fungsi untuk mengambil semua pengumuman yang statusnya aktif
+function getPengumumanAktif() {
+  global $conn;
+  $result = mysqli_query($conn, "SELECT * FROM informasi WHERE status = 'aktif' ORDER BY tanggal_publikasi DESC");
+  $pengumuman = [];
+  while ($row = mysqli_fetch_assoc($result)) {
+      $pengumuman[] = $row;
+  }
+  return $pengumuman;
 }
 
-// Fungsi untuk mengambil jadwal mengajar hari ini berdasarkan hari
+// Fungsi untuk mengambil jadwal mengajar hari ini berdasarkan nama guru
 function getJadwalMengajarHariIni($nama_guru) {
-    global $conn;
-    $query = "SELECT jadwal.jam_mulai, jadwal.jam_selesai, mata_pelajaran.nama_pelajaran as mata_pelajaran, kelas.nama_kelas as kelas 
-              FROM jadwal 
-              JOIN mata_pelajaran ON jadwal.mata_pelajaran_id = mata_pelajaran.id_mata_pelajaran 
-              JOIN kelas ON jadwal.kelas_id = kelas.id_kelas
-              WHERE jadwal.guru_id = '$nama_guru' AND jadwal.hari = DAYNAME(CURDATE())";
-    $result = mysqli_query($conn, $query);
-    $jadwal = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $jadwal[] = $row;
-    }
-    return $jadwal;
+  global $conn;
+  
+  // Mendapatkan ID guru berdasarkan nama lengkap
+  $queryGuru = "SELECT id_guru FROM guru WHERE nama_lengkap = '$nama_guru'";
+  $resultGuru = mysqli_query($conn, $queryGuru);
+  $guru = mysqli_fetch_assoc($resultGuru);
+
+  // Jika tidak ditemukan, kembalikan array kosong
+  if (!$guru) {
+      return [];
+  }
+
+  $guru_id = $guru['id_guru']; // Menyimpan ID guru yang ditemukan
+
+  // Mendapatkan nama hari (Senin, Selasa, dst)
+  $hariIni = date('l'); 
+  
+  // Mengonversi nama hari dalam bahasa Inggris ke bahasa Indonesia
+  $hariIndo = [
+      'Monday'    => 'Senin',
+      'Tuesday'   => 'Selasa',
+      'Wednesday' => 'Rabu',
+      'Thursday'  => 'Kamis',
+      'Friday'    => 'Jumat',
+      'Saturday'  => 'Sabtu',
+      'Sunday'    => 'Minggu'
+  ];
+  
+  // Mendapatkan nama hari dalam bahasa Indonesia
+  $hariIndo = $hariIndo[$hariIni];
+  
+  // Query untuk mengambil jadwal mengajar hari ini berdasarkan ID guru
+  $query = "SELECT jadwal.jam_mulai, jadwal.jam_selesai, mata_pelajaran.nama_pelajaran as mata_pelajaran, kelas.nama_kelas as kelas 
+            FROM jadwal 
+            JOIN mata_pelajaran ON jadwal.mata_pelajaran_id = mata_pelajaran.id_mata_pelajaran 
+            JOIN kelas ON jadwal.kelas_id = kelas.id_kelas
+            WHERE jadwal.guru_id = '$guru_id' AND jadwal.hari = '$hariIndo'"; 
+
+  $result = mysqli_query($conn, $query);
+  $jadwal = [];
+  while ($row = mysqli_fetch_assoc($result)) {
+      $jadwal[] = $row;
+  }
+  return $jadwal;
 }
 
 // Ambil data
 $nama_guru = $_SESSION['nama_lengkap'];
 $jadwalMengajar = getJadwalMengajarHariIni($nama_guru);
+$pengumumanAktif = getPengumumanAktif();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -168,10 +204,21 @@ $jadwalMengajar = getJadwalMengajarHariIni($nama_guru);
           <p class="text-gray-600 mt-4">Ini adalah dashboard untuk guru yang memungkinkan Anda melihat informasi penting.</p>
         </div>
 
-        <!-- Pengumuman -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6 fade-in-up">
-          <h3 class="text-lg font-semibold">Pengumuman Terbaru</h3>
-          <p class="text-gray-600 mt-4"><?php echo getPengumumanTerbaru(); ?></p>
+         <!-- Daftar Pengumuman -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+          <?php if (!empty($pengumumanAktif)): ?>
+            <ul class="space-y-4">
+              <?php foreach ($pengumumanAktif as $pengumuman): ?>
+                <li class="border-b border-gray-200 pb-4">
+                  <h3 class="font-semibold text-lg"><?php echo htmlspecialchars($pengumuman['judul_informasi']); ?></h3>
+                  <p class="text-sm text-gray-600 mt-2"><?php echo nl2br(htmlspecialchars($pengumuman['deskripsi'])); ?></p>
+                  <p class="text-xs text-gray-400 mt-2">Tanggal: <?php echo date("d M Y", strtotime($pengumuman['tanggal_publikasi'])); ?></p>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php else: ?>
+            <p class="text-gray-600">Tidak ada pengumuman aktif saat ini.</p>
+          <?php endif; ?>
         </div>
 
         <!-- Jadwal Mengajar Hari Ini and Inspirasi Hari Ini -->

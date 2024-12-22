@@ -8,8 +8,12 @@ if (!isset($_SESSION['nama_lengkap'])) {
     exit;
 }
 
-// Ambil data siswa untuk dropdown
-$query_siswa = "SELECT id_siswa, nama_lengkap FROM siswa";
+// Ambil data siswa berdasarkan nama lengkap dari session
+$query_siswa = "SELECT s.id_siswa, s.nama_lengkap 
+                FROM siswa s 
+                JOIN kelas k ON s.kelas_id = k.id_kelas
+                JOIN guru g ON k.wali_kelas_id = g.id_guru
+                WHERE g.nama_lengkap = '" . mysqli_real_escape_string($conn, $_SESSION['nama_lengkap']) . "'";
 $result_siswa = mysqli_query($conn, $query_siswa);
 
 // Ambil data mata pelajaran untuk input nilai

@@ -8,8 +8,22 @@ if (!isset($_SESSION['nama_lengkap'])) {
     exit;
 }
 
-// Ambil ID siswa dari session
-$nama_siswa = $_SESSION['nama_lengkap'];
+// Ambil nama lengkap dari session
+$nama_lengkap = $_SESSION['nama_lengkap'];
+
+// Ambil ID siswa dari database berdasarkan nama lengkap
+$query_siswa = "SELECT id_siswa FROM siswa WHERE nama_lengkap = '$nama_lengkap'";
+$result_siswa = mysqli_query($conn, $query_siswa);
+$siswa = mysqli_fetch_assoc($result_siswa);
+
+// Memeriksa apakah siswa ditemukan
+if (!$siswa) {
+    echo "Siswa tidak ditemukan.";
+    exit;
+}
+
+// Ambil ID siswa
+$id_siswa = $siswa['id_siswa'];
 
 // Ambil ID bank soal dari parameter GET
 $bank_soal_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -25,13 +39,22 @@ if (!$soal) {
     exit;
 }
 
+// Fetch jawaban yang sudah ada (jika ada)
+$existing_answer_query = "SELECT * FROM jawaban WHERE id_siswa = '$id_siswa' AND bank_soal_id = '$bank_soal_id'";
+$existing_answer_result = mysqli_query($conn, $existing_answer_query);
+$existing_answer = mysqli_fetch_assoc($existing_answer_result);
+
 // Proses penyimpanan jawaban jika form disubmit
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !$existing_answer) {
     $jawaban = mysqli_real_escape_string($conn, $_POST['jawaban']);
-    $query_jawaban = "INSERT INTO jawaban (siswa_id, bank_soal_id, jawaban) VALUES ('$nama_siswa', '$bank_soal_id', '$jawaban')";
+    
+    // Insert jawaban baru
+    $query_jawaban = "INSERT INTO jawaban (id_siswa, bank_soal_id, jawaban) VALUES ('$id_siswa', '$bank_soal_id', '$jawaban')";
     
     if (mysqli_query($conn, $query_jawaban)) {
         $success_message = "Jawaban berhasil disimpan!";
+        // Fetch the newly inserted answer
+        $existing_answer = mysqli_fetch_assoc(mysqli_query($conn, $existing_answer_query));
     } else {
         $error_message = "Error: " . mysqli_error($conn);
     }
@@ -71,20 +94,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             <?php endif; ?>
 
-            <form action="" method="POST">
+            <?php if ($existing_answer): ?>
                 <div class="mb-4">
-                    <label for="jawaban" class="block text-gray-700 font-bold mb-2">Jawaban:</label>
-                    <textarea id="jawaban" name="jawaban" rows="6" required 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Masukkan jawaban Anda..."></textarea>
+                    <p class="text-red-600 font-bold">Anda sudah mengerjakan soal ini. Jawaban Anda:</p>
+                    <textarea rows="4" class="w-full border border-gray-300 rounded p-2" readonly><?php echo htmlspecialchars($existing_answer['jawaban']); ?></textarea>
                 </div>
-                <div class="text-right">
-                    <button type="submit" 
-                        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-300">
-                        Simpan Jawaban
-                    </button>
-                </div>
-            </form>
+                <a href="bank_soal.php" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Kembali ke Bank Soal</a>
+            <?php else: ?>
+                <form action="" method="POST">
+                    <div class="mb-4">
+                        <label for="jawaban" class="block text-gray-700 font-bold mb-2">Jawaban:</label>
+                        <textarea id="jawaban" name="jawaban" rows="4" class="w-full border border-gray-300 rounded p-2" required></textarea>
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded">Simpan Jawaban</button>
+                </form>
+            <?php endif; ?>
         </div>
     </div>
 </body>

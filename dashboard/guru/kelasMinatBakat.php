@@ -21,8 +21,10 @@ if (!$kelas) {
     exit;
 }
 
-// Query untuk mengambil siswa yang terdaftar di kelas ini
-$siswa_query = "SELECT * FROM siswa WHERE ekstra_id = '$kelas_id'";
+// Query untuk mengambil siswa yang terdaftar di kelas ini, dengan JOIN untuk tingkat dan kelas
+$siswa_query = " SELECT siswa.nama_lengkap, kelas.tingkat, kelas.nama_kelas FROM siswa
+    JOIN kelas ON siswa.kelas_id = kelas.id_kelas
+    WHERE siswa.ekstra_id = '$kelas_id'";
 $siswa_result = mysqli_query($conn, $siswa_query);
 ?>
 <!DOCTYPE html>
@@ -64,9 +66,9 @@ $siswa_result = mysqli_query($conn, $siswa_query);
               while ($siswa = mysqli_fetch_assoc($siswa_result)) {
                   echo "<tr>";
                   echo "<td class='px-4 py-2 border-b'>" . $no++ . "</td>";
-                  echo "<td class='px-4 py-2 border-b'>" . $siswa['nama_siswa'] . "</td>";
+                  echo "<td class='px-4 py-2 border-b'>" . $siswa['nama_lengkap'] . "</td>";
                   echo "<td class='px-4 py-2 border-b'>" . $siswa['tingkat'] . "</td>";
-                  echo "<td class='px-4 py-2 border-b'>" . $siswa['kelas'] . "</td>";
+                  echo "<td class='px-4 py-2 border-b'>" . $siswa['nama_kelas'] . "</td>";
                   echo "</tr>";
               }
           } else {

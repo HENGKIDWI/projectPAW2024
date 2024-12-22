@@ -7,8 +7,23 @@ if (!isset($_SESSION['nama_lengkap'])) {
     exit;
 }
 
+// Update status berdasarkan tanggal hari ini
+$today = date('Y-m-d');
+$updateQuery = "UPDATE informasi 
+                SET status = CASE 
+                  WHEN tanggal_publikasi = '$today' THEN 'aktif' 
+                  ELSE 'tidak aktif' 
+                END";
+mysqli_query($conn, $updateQuery);
+
 // Fungsi untuk mengambil semua informasi
-$query = "SELECT * FROM informasi ORDER BY tanggal_publikasi DESC";
+$query = "SELECT *, 
+                 CASE 
+                     WHEN status = 'aktif' THEN 'status-aktif' 
+                     ELSE 'status-tidak-aktif' 
+                 END AS status_class 
+          FROM informasi 
+          ORDER BY tanggal_publikasi DESC";
 $result = mysqli_query($conn, $query);
 
 // Hapus informasi jika tombol di klik
@@ -144,9 +159,6 @@ if (isset($_GET['delete'])) {
           <h3 class="text-xl font-semibold text-gray-800">Semua Pengumuman</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             <?php while ($row = mysqli_fetch_assoc($result)) : ?>
-              <?php
-              $is_aktif = (date('Y-m-d') === $row['tanggal_publikasi']);
-              ?>
               <div class="info-card bg-white shadow-lg rounded-lg p-4">
                 <div class="flex justify-between items-center mb-3">
                   <h4 class="text-xl font-bold text-blue-600"><?php echo htmlspecialchars($row['judul_informasi']); ?></h4>
@@ -158,8 +170,8 @@ if (isset($_GET['delete'])) {
                   </div>
                 </div>
                 <div class="flex justify-between items-center mt-3">
-                  <span class="<?php echo $is_aktif ? 'status-aktif' : 'status-tidak-aktif'; ?>">
-                    <?php echo $is_aktif ? 'Aktif (Dipublikasi)' : 'Tidak Aktif (Belum Dipublikasi)'; ?>
+                  <span class="<?php echo htmlspecialchars($row['status_class']); ?>">
+                    <?php echo ucfirst(htmlspecialchars($row['status'])); ?>
                   </span>
                   <a href="editInformasi.php?id=<?php echo htmlspecialchars($row['id_informasi']); ?>" class="bg-blue-500 text-white px-4 py-1 rounded-lg hover:bg-blue-600 transition-all">
                     <i class="fas fa-edit"></i> Update
