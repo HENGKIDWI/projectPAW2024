@@ -11,8 +11,9 @@ $query = "SELECT g.nip, g.nama_lengkap, mp.nama_pelajaran
           LEFT JOIN mata_pelajaran mp ON g.mata_pelajaran_id = mp.id_mata_pelajaran";
 $result = mysqli_query($conn, $query);
 
-// Nama kepala sekolah (diinput manual)
-$namaKepsek = "Drs. Abdul Rahman, M.Pd.";
+// Query untuk mendapatkan data jabatan Kepala Sekolah dan Kesiswaan
+$query_jabatan = "SELECT nama_jabatan, nama_personil FROM jabatan WHERE nama_jabatan IN ('Kepala Sekolah', 'Kesiswaan')";
+$result_jabatan = mysqli_query($conn, $query_jabatan);
 
 // Membuat konten HTML untuk PDF
 $html = "<html>
