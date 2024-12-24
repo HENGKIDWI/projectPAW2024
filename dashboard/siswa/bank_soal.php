@@ -2,16 +2,10 @@
 include "../../koneksi.php";
 session_start();
 
-// Memeriksa apakah pengguna sudah login
-if (!isset($_SESSION['nama_lengkap'])) {
-    header("Location: ../../login.php");
-    exit;
-}
-
-// Function to get filtered bank soal data
-function getBankSoal($search = '', $mataPelajaran = '', $kelas = '') {
+// Function to get filtered bank soal data for students
+function getBankSoalForStudents($search = '', $mataPelajaran = '', $kelas = '') {
     global $conn;
-    $query = "SELECT * FROM bank_soal WHERE 1=1";
+    $query = "SELECT * FROM bank_soal WHERE 1=1"; // Menghapus kondisi status
     
     if (!empty($search)) {
         $search = mysqli_real_escape_string($conn, $search);
@@ -37,8 +31,6 @@ function getBankSoal($search = '', $mataPelajaran = '', $kelas = '') {
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $selectedMataPelajaran = isset($_GET['mata_pelajaran']) ? $_GET['mata_pelajaran'] : '';
 $selectedKelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
-
-$bank_soal = getBankSoal($search, $selectedMataPelajaran, $selectedKelas);
 ?>
 
 <!DOCTYPE html>
@@ -47,8 +39,8 @@ $bank_soal = getBankSoal($search, $selectedMataPelajaran, $selectedKelas);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Bank Soal</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Bank Soal Siswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-50">
@@ -61,7 +53,7 @@ $bank_soal = getBankSoal($search, $selectedMataPelajaran, $selectedKelas);
     <main class="container mx-auto px-4 py-8">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Daftar Bank Soal</h1>
+                <h1 class="text-3xl font-bold text-gray-800">Bank Soal Siswa</h1>
             </div>
 
             <!-- Search and Filter Form -->
@@ -81,38 +73,56 @@ $bank_soal = getBankSoal($search, $selectedMataPelajaran, $selectedKelas);
                     <option value="">Semua Kelas</option>
                     <option value="7" <?php echo $selectedKelas == '7' ? 'selected' : ''; ?>>Kelas 7</option>
                     <option value="8" <?php echo $selectedKelas == '8' ? 'selected' : ''; ?>>Kelas 8</option>
-                    <option value="9" <?php echo $selectedKelas == ' 9' ? 'selected' : ''; ?>>Kelas 9</option>
+                    <option value="9" <?php echo $selectedKelas == '9' ? 'selected' : ''; ?>>Kelas 9</option>
                 </select>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">Cari</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Filter
+                </button>
             </form>
 
-            <!-- Daftar Soal -->
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <table class="min-w-full">
-                    <thead>
-                        <tr>
-                            <th class="py-2 px-4 border-b">Judul Soal</th>
-                            <th class="py-2 px-4 border-b">Mata Pelajaran</th>
-                            <th class="py-2 px-4 border-b">Kelas</th>
-                            <th class="py-2 px-4 border-b">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($row = mysqli_fetch_assoc($bank_soal)): ?>
-                        <tr>
-                            <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($row['judul_bank_soal']); ?></td>
-                            <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($row['mata_pelajaran']); ?></td>
-                            <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($row['kelas']); ?></td>
-                            <td class="py-2 px-4 border-b">
-                                <a href="kerjakan_soal.php?id=<?php echo $row['id']; ?>" class="text-blue-600 hover:underline">Kerjakan</a>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+            <!-- Table Section -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow -x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul Bank Soal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detail</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mata Pelajaran</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Soal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL Soal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <?php
+                            $bank_soal = getBankSoalForStudents($search, $selectedMataPelajaran, $selectedKelas);
+                            if ($bank_soal && mysqli_num_rows($bank_soal) > 0) {
+                                while ($row = mysqli_fetch_assoc($bank_soal)) {
+                                    echo "<tr class='hover:bg-gray-50'>";
+                                    echo "<td class='px-6 py-4 whitespace-nowrap'>{$row['id']}</td>";
+                                    echo "<td class='px-6 py-4 whitespace-nowrap'>{$row['judul_bank_soal']}</td>";
+                                    echo "<td class='px-6 py-4'>{$row['detail_bank_soal']}</td>";
+                                    echo "<td class='px-6 py-4'>{$row['mata_pelajaran']}</td>";
+                                    echo "<td class='px-6 py-4'>{$row['kelas']}</td>";
+                                    echo "<td class='px-6 py-4'>" . 
+                                    ($row['file_soal'] ? "<a href='uploads/soal/{$row['file_soal']}' target='_blank' class='text-blue-600 hover:underline'>File Soal</a>" : '-') . 
+                                    "</td>";
+                                    echo "<td class='px-6 py-4'>" . ($row['url_soal'] ? "<a href='{$row['url_soal']}' target='_blank' class='text-blue-600 hover:underline'>Url Soal</a>" : '-') . "</td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='7' class='px-6 py-4 text-center'>Tidak ada data</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
-</body>
 
+    <?php include '../../layout/footer.php'; ?>
+</body>
 </html>
