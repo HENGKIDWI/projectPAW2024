@@ -14,17 +14,14 @@ if (isset($_GET['id'])) {
     // Query untuk menghapus data kelas berdasarkan ID
     $query = "DELETE FROM ekstrakurikuler WHERE id_ekstrakurikuler = '$id_kelas'";
 
-    // Eksekusi query
     if (mysqli_query($conn, $query)) {
-        echo "<script>
-                alert('Kelas berhasil dihapus!');
-                window.location.href = 'DaftarKelasMinat.php';
-              </script>";
+        echo "<script>alert('Kelas berhasil dihapus!');</script>";
+        header("Location: DaftarKelasMinat.php");
+        exit;
     } else {
-        echo "<script>
-                alert('Gagal menghapus kelas. Silakan coba lagi.');
-                window.location.href = 'DaftarKelasMinat.php';
-              </script>";
+        echo "<script>alert('Gagal menghapus kelas. Silakan coba lagi.');</script>";
+        header("Location: DaftarKelasMinat.php");
+        exit;
     }
 } else {
     // Jika tidak ada ID, redirect ke halaman utama

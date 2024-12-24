@@ -11,7 +11,6 @@ $nama_guru = $_SESSION['guru_id'];
 
 // Proses form ketika disubmit
 if (isset($_POST["buat"])) {
-    // Ambil data dari form
     $nama_kelas = mysqli_real_escape_string($conn, $_POST['nama_kelas']);
     $hari = mysqli_real_escape_string($conn, $_POST['hari']);
     $waktu_mulai = mysqli_real_escape_string($conn, $_POST['waktu_mulai']);
@@ -22,19 +21,16 @@ if (isset($_POST["buat"])) {
     $query = "INSERT INTO ekstrakurikuler (nama_kegiatan, hari_kegiatan, jam_mulai, jam_selesai, tempat_kegiatan, pembimbing_id) 
               VALUES ('$nama_kelas', '$hari', '$waktu_mulai', '$waktu_selesai', '$ruang_kelas', '$nama_guru')";
 
-    // Eksekusi query
     if (mysqli_query($conn, $query)) {
         // Jika berhasil, redirect ke halaman kelas ekstrakurikuler
-        echo "<script>
-                alert('Kelas berhasil dibuat!');
-              </script>";
-              header("Location: DaftarKelasMinat.php");
-              exit();
+        echo "<script>alert('Kelas berhasil dibuat!');</script>";
+        header("Location: DaftarKelasMinat.php");
+        exit;
     } else {
         // Jika gagal, tampilkan pesan error
-        echo "<script>
-                alert('Gagal menyimpan kelas. Silakan coba lagi.');
-              </script>";
+        echo "<script>alert('Gagal menyimpan kelas. Silakan coba lagi.');</script>";
+        header("Location: DaftarKelasMinat.php");
+        exit;
     }
 }
 ?>
@@ -67,7 +63,6 @@ if (isset($_POST["buat"])) {
           <input type="text" class="w-full p-3 border border-gray-300 rounded-md" id="nama_kelas" name="nama_kelas" required>
         </div>
 
-        <!-- Jadwal Kompleks -->
         <div class="mb-4">
           <label for="hari" class="block text-sm font-medium text-gray-700">Hari</label>
           <select class="w-full p-3 border border-gray-300 rounded-md" id="hari" name="hari" required>
@@ -101,7 +96,7 @@ if (isset($_POST["buat"])) {
       </form>
     </div>
 
-    <!-- Tabel Kelas yang Sudah Dibuat -->
+    <!-- Data Kelas yang Sudah Dibuat -->
     <div class="bg-white shadow-lg rounded-lg">
       <div class="bg-blue-600 text-white px-6 py-3 rounded-t-lg font-semibold">Kelas yang Sudah Dibuat</div>
       <div class="px-6 py-4">
@@ -121,7 +116,7 @@ if (isset($_POST["buat"])) {
             <?php
             $query = "SELECT * FROM ekstrakurikuler ORDER BY id_ekstrakurikuler DESC";
             $result = mysqli_query($conn, $query);
-            $no = 1; // Mengatur nomor urut tabel
+            $no = 1;
 
             if (mysqli_num_rows($result) > 0) {
               while ($row = mysqli_fetch_assoc($result)) {

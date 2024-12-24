@@ -32,7 +32,7 @@ $guru_id = $_SESSION['guru_id']; // Mendapatkan ID guru dari session
 
     <!-- Tombol Buat Kelas -->
     <div class="mb-6 text-right">
-      <a href="BuatKelasMinat.php" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Manajemen Ektrakurikuler</a>
+      <a href="BuatKelasMinat.php" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Buat Ektrakurikuler</a>
     </div>
 
     <!-- Menampilkan Kelas yang Dibuat Guru -->
@@ -53,7 +53,6 @@ $guru_id = $_SESSION['guru_id']; // Mendapatkan ID guru dari session
                 echo "<p class='text-sm text-gray-600'>Hari: " . $row['hari_kegiatan'] . "</p>";
                 echo "<p class='text-sm text-gray-600'>Waktu: " . $row['jam_mulai'] . " - " . $row['jam_selesai'] . "</p>";
                 echo "<p class='text-sm text-gray-600'>Tempat: " . $row['tempat_kegiatan'] . "</p>";
-                // Tombol "Lihat Kelas" untuk melihat daftar siswa
                 echo "<a href='KelasMinatBakat.php?id=" . $row['id_ekstrakurikuler'] . "' class='text-blue-500 hover:underline'>Lihat Kelas</a>";
                 echo "</div>";
             }

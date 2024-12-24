@@ -70,7 +70,7 @@ $kelas_list = getKelasList();
     </div>
 
     <div class="grid grid-cols-1 gap-6 md:gap-10">
-      <!-- Riwayat Materi (Atas) -->
+      <!-- Riwayat Data Materi -->
       <div class="bg-white shadow-md rounded-lg p-6">
         <form action="" method="GET" class="flex items-center space-x-4">
           <!-- Dropdown Kelas -->

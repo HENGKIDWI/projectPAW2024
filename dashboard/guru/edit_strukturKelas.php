@@ -10,27 +10,24 @@ if (!isset($_SESSION['nama_lengkap'])) {
 if (isset($_GET['id'])) {
     $id_struktural = $_GET['id'];
 
-    // Fetch the current structure details
     $query = "SELECT * FROM struktural_kelas WHERE id_struktural = '$id_struktural'";
     $result = mysqli_query($conn, $query);
     $data = mysqli_fetch_assoc($result);
 
-    // Get the class and student info
     $kelas_id = $data['id_kelas'];
     $siswa_id = $data['siswa_id'];
     $jabatan = $data['jabatan'];
 
-    // Fetch available classes and students for selection
     $kelas_list = mysqli_query($conn, "SELECT id_kelas, nama_kelas FROM kelas ORDER BY nama_kelas ASC");
     $siswa_list = mysqli_query($conn, "SELECT id_siswa, nama_lengkap FROM siswa ORDER BY nama_lengkap ASC");
 
-    // Process the update form
+    // Proses Submit form
     if (isset($_POST['update'])) {
         $kelas_id = $_POST['id_kelas'];
         $siswa_id = $_POST['siswa'];
         $jabatan = $_POST['jabatan'];
 
-        // Update the structure in the database
+        // Update struktur kelas di database
         $update_query = "UPDATE struktural_kelas SET id_kelas = '$kelas_id', siswa_id = '$siswa_id', jabatan = '$jabatan' WHERE id_struktural = '$id_struktural'";
 
         if (mysqli_query($conn, $update_query)) {

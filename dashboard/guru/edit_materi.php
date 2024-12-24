@@ -18,11 +18,13 @@ if (isset($_GET["id"])) {
     if (mysqli_num_rows($result) > 0) {
         $materi = mysqli_fetch_assoc($result);
     } else {
-        echo "<script>alert('Materi tidak ditemukan!'); window.location.href='materi_belajar.php';</script>";
+        echo "<script>alert('Materi tidak ditemukan!');</script>";
+        header("Location: materi_belajar.php");
         exit;
     }
 } else {
-    echo "<script>alert('ID materi tidak ditemukan!'); window.location.href='materi_belajar.php';</script>";
+    echo "<script>alert('ID materi tidak ditemukan!');</script>";
+    header("Location: materi_belajar.php");
     exit;
 }
 
@@ -59,17 +61,16 @@ if (isset($_POST["edit"])) {
     }
 
     // Query untuk update materi
-    $query_update = "
-        UPDATE materi
-        SET judul = '$judul', deskripsi = '$deskripsi', link_yt = '$link_yt', file_path = '$file_path'
-        WHERE id_materi = '$id_materi' AND id_guru = '$nama_guru'
-    ";
+    $query_update = "UPDATE materi SET judul = '$judul', deskripsi = '$deskripsi', link_yt = '$link_yt', file_path = '$file_path'
+        WHERE id_materi = '$id_materi' AND id_guru = '$nama_guru'";
 
     if (mysqli_query($conn, $query_update)) {
         header("Location: materi_belajar.php?status=edit_sukses");
         exit;
     } else {
         echo "<script>alert('Terjadi kesalahan saat mengedit materi: " . mysqli_error($conn) . "');</script>";
+        header("Location: materi_belajar.php");
+        exit;
     }
 }
 ?>

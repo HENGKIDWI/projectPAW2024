@@ -10,9 +10,9 @@ if (!isset($_SESSION['nama_lengkap'])) {
 
 // Ambil data siswa berdasarkan nama lengkap dari session
 $query_siswa = "SELECT s.id_siswa, s.nama_lengkap 
-                FROM siswa s 
-                JOIN kelas k ON s.kelas_id = k.id_kelas
-                JOIN guru g ON k.wali_kelas_id = g.id_guru
+                FROM siswa AS s 
+                JOIN kelas AS k ON s.kelas_id = k.id_kelas
+                JOIN guru AS g ON k.wali_kelas_id = g.id_guru
                 WHERE g.nama_lengkap = '" . mysqli_real_escape_string($conn, $_SESSION['nama_lengkap']) . "'";
 $result_siswa = mysqli_query($conn, $query_siswa);
 
@@ -186,7 +186,7 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
 
     <?php require_once "../../layout/footer.php"; ?>
 
-    <!-- JavaScript Hitung Rata-Rata -->
+    <!-- Hitung Rata-Rata -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const nilaiInputs = document.querySelectorAll('input[name="nilai_pengetahuan[]"], input[name="nilai_keterampilan[]"]');
