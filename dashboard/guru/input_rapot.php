@@ -20,12 +20,16 @@ $result_siswa = mysqli_query($conn, $query_siswa);
 $query_mapel = "SELECT id_mata_pelajaran, nama_pelajaran FROM mata_pelajaran";
 $result_mapel = mysqli_query($conn, $query_mapel);
 
-// Query untuk mendapatkan data riwayat rapor
-$query_riwayat = "SELECT r.id_rapot, s.nama_lengkap AS nama_siswa, r.semester, r.tahun_ajaran, r.nilai_rata, r.ekskul, r.nilai_ekskul, r.catatan_wali FROM rapot AS r
+// Query untuk mendapatkan data riwayat rapor untuk guru wali kelas
+$query_riwayat = " SELECT r.id_rapot, s.nama_lengkap AS nama_siswa, r.semester, r.tahun_ajaran, r.nilai_rata, r.ekskul, r.nilai_ekskul, r.catatan_wali FROM rapot AS r
     INNER JOIN siswa AS s ON r.siswa_id = s.id_siswa
+    INNER JOIN kelas AS k ON s.kelas_id = k.id_kelas
+    INNER JOIN guru AS g ON k.wali_kelas_id = g.id_guru
+    WHERE g.nama_lengkap = '" . mysqli_real_escape_string($conn, $_SESSION['nama_lengkap']) . "'
     ORDER BY r.tahun_ajaran DESC, r.semester ASC
 ";
 $result_riwayat = mysqli_query($conn, $query_riwayat);
+
 ?>
 
 <!DOCTYPE html>
@@ -139,7 +143,7 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
         </div>
     </div>
 
-    <!-- Riwayor -->
+    <!-- Riwayat Rapot -->
     <div class="bg-white shadow-lg rounded-lg p-6">
         <h3 class="text-2xl font-semibold mb-4">Riwayat Data Input Rapor</h3>
         <table class="table-auto w-full text-left border-collapse border border-gray-200">
@@ -177,7 +181,7 @@ $result_riwayat = mysqli_query($conn, $query_riwayat);
                     <?php endwhile; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="9" class="text-center text-gray-500 py-4">Belum ada data rapor yang diinput.</td>
+                        <td colspan="9" class="text-center text-gray-500 py-4">Belum ada data rapor anda yang diinput.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
