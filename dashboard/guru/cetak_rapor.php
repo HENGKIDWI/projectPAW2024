@@ -120,6 +120,10 @@ $html = <<<HTML
             text-align: center;
         }
 
+        .absensi-table th{
+            background-color: #eaeaea;
+        }
+
         .nilai-table th {
             background-color: #eaeaea;
         }
@@ -174,7 +178,7 @@ $html = <<<HTML
         <div class='logo'>
             <img src='https://i.pinimg.com/originals/e2/57/46/e257468b494f341546a8a30c47b023d6.png' alt='Logo Sekolah'>
         </div>
-        <h2 class="header-title">Rapor Siswa</h2>
+        <h2 class="header-title">Dinas Pendidikan Kabupaten Sampang</h2>
         <h3 class="header-title">SMP Negeri 1 Tambelangan</h3>
         <h4 class="header-subtitle">Tahun Ajaran {$rapor['tahun_ajaran']}</h4>
         <p class="header-subtitle">Jl. Raya Tambelangan - Sampang 69253 Karang Anyar</p>
@@ -288,7 +292,7 @@ $options->set('isRemoteEnabled', true);
 
 $dompdf = new Dompdf($options);
 $dompdf->loadHtml($html);
-$dompdf->setPaper('A3', 'portrait');
+$dompdf->setPaper('A2', 'portrait');
 $dompdf->render();
 $dompdf->stream("Rapor_Siswa_{$rapor['nama_lengkap']}.pdf", ["Attachment" => false]);
 exit;
