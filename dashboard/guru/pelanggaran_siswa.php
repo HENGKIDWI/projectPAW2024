@@ -67,38 +67,46 @@ function simpanPelanggaran($data)
 }
 
 // Fungsi untuk mengambil riwayat pelanggaran dengan nama guru wali
-function getRiwayatPelanggaran($nama_siswa = '', $kelas = '')
-{
+function getRiwayatPelanggaran($nama_siswa = '', $kelas = '') {
   global $conn;
   $conditions = [];
   if ($nama_siswa) {
-    $nama_siswa = mysqli_real_escape_string($conn, $nama_siswa);
-    $conditions[] = "s.nama_lengkap LIKE '%$nama_siswa%'";
+      $nama_siswa = mysqli_real_escape_string($conn, $nama_siswa);
+      $conditions[] = "s.nama_lengkap LIKE '%$nama_siswa%'";
   }
   if ($kelas) {
-    $conditions[] = "k.id_kelas = '$kelas'";
+      $conditions[] = "k.id_kelas = '$kelas'";
   }
 
   $where_clause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
   $query = "SELECT 
-                s.nama_lengkap AS nama_siswa,
-                CONCAT(k.tingkat, ' ', k.nama_kelas) AS nama_kelas,
-                IFNULL(g.nama_lengkap, 'Tidak Ada Guru Wali') AS nama_guru_wali,
-                p.poin AS poin_terbaru,
-                p.tanggal_pelanggaran,
-                p.deskripsi,
-                (
-                    SELECT SUM(p2.poin) 
-                    FROM pelanggaran p2
-                    WHERE p2.siswa_id = s.id_siswa
-                ) AS total_poin
-              FROM pelanggaran p
-              JOIN siswa s ON p.siswa_id = s.id_siswa
-              JOIN kelas k ON p.id_kelas = k.id_kelas
-              LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru
-              $where_clause
-              ORDER BY p.tanggal_pelanggaran DESC";
+              p.id_pelanggaran,
+              s.nama_lengkap AS nama_siswa,
+              CONCAT(k.tingkat, ' ', k.nama_kelas) AS nama_kelas,
+              IFNULL(g.nama_lengkap, 'Tidak Ada Guru Wali') AS nama_guru_wali,
+              p.poin AS poin_terbaru,
+              p.tanggal_pelanggaran,
+              p.deskripsi,
+              (
+                  SELECT SUM(p2.poin) 
+                  FROM pelanggaran p2
+                  WHERE p2.siswa_id = s.id_siswa
+              ) AS total_poin
+            FROM pelanggaran p
+            JOIN siswa s ON p.siswa_id = s.id_siswa
+            JOIN kelas k ON p.id_kelas = k.id_kelas
+            LEFT JOIN guru g ON k.wali_kelas_id = g.id_guru
+            $where_clause
+            ORDER BY p.tanggal_pelanggaran DESC";
 
+  return mysqli_query($conn, $query);
+}
+
+// hapus pelanggaran
+function hapusPelanggaran($id_pelanggaran) {
+  global $conn;
+  $id_pelanggaran = mysqli_real_escape_string($conn, $id_pelanggaran);
+  $query = "DELETE FROM pelanggaran WHERE id_pelanggaran = '$id_pelanggaran'";
   return mysqli_query($conn, $query);
 }
 
@@ -110,6 +118,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_pelanggaran']))
     exit();
   } else {
     $error = "Gagal menyimpan pelanggaran: " . mysqli_error($conn);
+  }
+}
+
+// Proses penghapusan pelanggaran
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['hapus_pelanggaran'])) {
+  $id_pelanggaran = $_POST['id_pelanggaran'];
+  if (hapusPelanggaran($id_pelanggaran)) {
+      $sukses = "Pelanggaran berhasil dihapus!";
+  } else {
+      $error = "Gagal menghapus pelanggaran: " . mysqli_error($conn);
   }
 }
 
@@ -224,7 +242,7 @@ $nama_siswa = isset($_POST['nama_siswa']) ? $_POST['nama_siswa'] : '';
         </form>
 
         <table class="table-auto w-full text-left border-collapse border border-gray-300">
-          <thead>
+        <thead>
             <tr>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">NO</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Kelas</th>
@@ -234,6 +252,7 @@ $nama_siswa = isset($_POST['nama_siswa']) ? $_POST['nama_siswa'] : '';
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Poin</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Tanggal</th>
               <th class="px-4 py-2 border border-gray-300 bg-blue-100">Total Poin</th>
+              <th class="px-4 py-2 border border-gray-300 bg-blue-100">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -241,16 +260,24 @@ $nama_siswa = isset($_POST['nama_siswa']) ? $_POST['nama_siswa'] : '';
             $riwayat = getRiwayatPelanggaran($nama_siswa, $selected_kelas);
             $no = 1;
             while ($row = mysqli_fetch_assoc($riwayat)) {
-              echo "<tr>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['deskripsi'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
-              echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";
-              echo "</tr>";
+                echo "<tr>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $no++ . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_kelas'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_siswa'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['nama_guru_wali'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['deskripsi'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['poin_terbaru'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['tanggal_pelanggaran'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>" . $row['total_poin'] . "</td>";
+                echo "<td class='px-4 py-2 border border-gray-300'>
+                        <form method='POST' onsubmit='return confirm(\"Apakah Anda yakin ingin menghapus pelanggaran ini?\");'>
+                            <input type='hidden' name='id_pelanggaran' value='" . $row['id_pelanggaran'] . "'>
+                            <button type='submit' name='hapus_pelanggaran' class='bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200'>
+                                Hapus
+                            </button>
+                        </form>
+                      </td>";
+                echo "</tr>";
             }
             ?>
           </tbody>
