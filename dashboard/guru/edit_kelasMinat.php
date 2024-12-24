@@ -7,7 +7,7 @@ if (!isset($_SESSION['nama_lengkap'])) {
     exit;
 }
 
-// Pastikan ada ID kelas yang ingin diedit
+// Memeriksa dan mengambil ID kelas yang ingin diedit
 if (isset($_GET['id'])) {
     $id_kelas = mysqli_real_escape_string($conn, $_GET['id']);
 
@@ -18,16 +18,13 @@ if (isset($_GET['id'])) {
 
     // Jika kelas tidak ditemukan
     if (!$row) {
-        echo "<script>
-                alert('Kelas tidak ditemukan!');
-                window.location.href = 'DaftarKelasMinat.php';
-              </script>";
+        echo "<script>alert('Kelas tidak ditemukan!');</script>";
+        header("Location: DaftarKelasMinat.php");
         exit;
     }
 
     // Proses form ketika disubmit
     if (isset($_POST["edit"])) {
-        // Ambil data dari form
         $nama_kelas = mysqli_real_escape_string($conn, $_POST['nama_kelas']);
         $hari = mysqli_real_escape_string($conn, $_POST['hari']);
         $waktu_mulai = mysqli_real_escape_string($conn, $_POST['waktu_mulai']);
@@ -39,16 +36,14 @@ if (isset($_GET['id'])) {
                   SET nama_kegiatan = '$nama_kelas', hari_kegiatan = '$hari', jam_mulai = '$waktu_mulai', jam_selesai = '$waktu_selesai', tempat_kegiatan = '$ruang_kelas'
                   WHERE id_ekstrakurikuler = '$id_kelas'";
 
-        // Eksekusi query
         if (mysqli_query($conn, $query)) {
-            echo "<script>
-                    alert('Kelas berhasil diperbarui!');
-                    window.location.href = 'DaftarKelasMinat.php';
-                  </script>";
+            echo "<script>alert('Kelas berhasil diperbarui!');</script>";
+            header("Location: DaftarKelasMinat.php");
+            exit;
         } else {
-            echo "<script>
-                    alert('Gagal memperbarui kelas. Silakan coba lagi.');
-                  </script>";
+            echo "<script>alert('Gagal memperbarui kelas. Silakan coba lagi.');</script>";
+            header("Location: DaftarKelasMinat.php");
+            exit;
         }
     }
 } else {
