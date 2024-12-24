@@ -6,7 +6,7 @@ session_start();
 // Function to get list of classes
 function getDaftarKelas() {
     global $conn;
-    $query = "SELECT DISTINCT tingkat FROM kelas ORDER BY tingkat ASC" ;
+    $query = "SELECT DISTINCT tingkat FROM kelas ORDER BY tingkat ASC"; ;
     return mysqli_query($conn, $query);
 }
 

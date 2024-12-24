@@ -14,7 +14,7 @@ function getDaftarKelasPercabangan($id_kelas)
 function getDaftarKelas($guru_id)
 {
   global $conn;
-  $query = "SELECT id_kelas, tingkat, nama_kelas FROM kelas";
+  $query = "SELECT id_kelas, tingkat, nama_kelas FROM kelas ORDER BY tingkat, nama_kelas";
   return mysqli_query($conn, $query);
 }
 

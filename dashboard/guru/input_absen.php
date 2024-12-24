@@ -28,7 +28,7 @@ function getDaftarKelas($guru_id)
   $guru_id = mysqli_real_escape_string($conn, $guru_id);
   $query = "SELECT DISTINCT kelas.* FROM kelas 
               JOIN jadwal ON kelas.id_kelas = jadwal.kelas_id 
-              WHERE jadwal.guru_id = '$guru_id'";
+              WHERE jadwal.guru_id = '$guru_id' ORDER BY kelas.tingkat, kelas.nama_kelas";
   $result = mysqli_query($conn, $query);
 
   return $result ? $result : handleDatabaseError($conn, $query);
