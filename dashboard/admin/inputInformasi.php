@@ -13,15 +13,19 @@ if (isset($_POST['submit'])) {
     $deskripsi = $_POST['deskripsi'];
     $tanggal_publikasi = $_POST['tanggal_publikasi'];
 
-    // Menentukan status berdasarkan tanggal publikasi
-    $tanggal_sekarang = date('Y-m-d'); // Mendapatkan tanggal saat ini
-    if ($tanggal_publikasi >= $tanggal_sekarang) {
-        // Jika tanggal publikasi besok, status akan aktif besok
-        $status = 'aktif';
-    } else {
-        // Jika tanggal publikasi hari ini atau sebelumnya, status langsung aktif
-        $status = 'tidak aktif';
+    // Mendapatkan tanggal saat ini
+    $tanggal_sekarang = date('Y-m-d');
+
+    // Validasi tanggal
+    if ($tanggal_publikasi < $tanggal_sekarang) {
+        $_SESSION['status'] = "Tanggal publikasi tidak boleh kurang dari hari ini!";
+        $_SESSION['status_code'] = "error";
+        header("Location: inputInformasi.php");
+        exit;
     }
+
+    // Menentukan status berdasarkan tanggal publikasi
+    $status = ($tanggal_publikasi == $tanggal_sekarang) ? 'aktif' : 'tidak aktif';
 
     // Query untuk memasukkan data
     $insert_query = "INSERT INTO informasi (judul_informasi, deskripsi, tanggal_publikasi, status, dibuat_oleh) 
@@ -36,6 +40,7 @@ if (isset($_POST['submit'])) {
     }
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -78,9 +83,10 @@ if (isset($_POST['submit'])) {
         </div>
 
         <div class="mb-4">
-          <label for="tanggal_publikasi" class="block text-sm font-semibold">Tanggal Publikasi</label>
-          <input type="date" name="tanggal_publikasi" id="tanggal_publikasi" class="border px-4 py-2 w-full" required>
+            <label for="tanggal_publikasi" class="block text-sm font-semibold">Tanggal Publikasi</label>
+            <input type="date" name="tanggal_publikasi" id="tanggal_publikasi" class="border px-4 py-2 w-full" required min="<?php echo date('Y-m-d'); ?>">
         </div>
+
 
         <button type="submit" name="submit" class="bg-blue-500 text-white px-6 py-2 rounded">Submit</button>
       </form>

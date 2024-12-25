@@ -199,41 +199,45 @@ $result_kelas = mysqli_query($conn, $query_kelas);
                 <h2 class="text-4xl font-bold text-white bg-gradient-to-r from-blue-900 via-blue-800 to-blue-500 p-6 rounded-lg shadow-lg mb-4">
                      <?php echo $judul; ?>
                 </h2>
-                <table class="min-w-full table-auto">
+                <table class="min-w-full table-auto rounded-lg">
                     <thead>
                         <tr class="bg-blue-600 text-white">
-                            <th class="py-3 px-4 text-left">ID</th>
-                            <th class="py-3 px-4 text-left">NISN</th>
-                            <th class="py-3 px-4 text-left">Nama Lengkap</th>
-                            <th class="py-3 px-4 text-left">Kelas</th>
-                            <th class="py-3 px-4 text-left">Alamat</th>
-                            <th class="py-3 px-4 text-left">Tanggal Lahir</th>
-                            <th class="py-3 px-4 text-left">No Telp</th>
-                            <th class="py-3 px-4 text-left">Jenis Kelamin</th>
-                            <th class="py-3 px-4 text-left">Aksi</th>
+                            <th class="border py-3 px-4 text-left">No</th>
+                            <th class="border py-3 px-4 text-left">NISN</th>
+                            <th class="border py-3 px-4 text-left">Nama Lengkap</th>
+                            <th class="border py-3 px-4 text-left">Kelas</th>
+                            <th class="border py-3 px-4 text-left">Alamat</th>
+                            <th class="border py-3 px-4 text-left">Tanggal Lahir</th>
+                            <th class="border py-3 px-4 text-left">No Telp</th>
+                            <th class="border py-3 px-4 text-left">Jenis Kelamin</th>
+                            <th class="border py-3 px-4 text-left">Aksi</th>
                         </tr>
                     </thead>
+                    <?php $no = 1; ?>
                     <tbody>
                         <?php if (mysqli_num_rows($result) > 0): ?>
                             <?php while ($row = mysqli_fetch_assoc($result)): ?>
                             <tr class="hover:bg-gray-50">
-                                <td class="py-3 px-4"><?php echo $row['id_siswa']; ?></td>
-                                <td class="py-3 px-4"><?php echo htmlspecialchars($row['nis']); ?></td>
-                                <td class="py-3 px-4"><?php echo htmlspecialchars($row['nama_lengkap']); ?></td>
-                                <td class="py-3 px-4"><?php echo "Kelas " . htmlspecialchars($row['tingkat']) . " - " . htmlspecialchars($row['nama_kelas']); ?></td>
-                                <td class="py-3 px-4"><?php echo htmlspecialchars($row['alamat']); ?></td>
-                                <td class="py-3 px-4"><?php echo htmlspecialchars($row['tanggal_lahir']); ?></td>
-                                <td class="py-3 px-4"><?php echo htmlspecialchars($row['no_telp']); ?></td>
-                                <td class="py-3 px-4"><?php echo htmlspecialchars($row['jenis_kelamin']); ?></td>
-                                <td class="py-3 px-4">
+                                <td class="border py-3 px-4"><?php echo $no; ?></td>
+                                <td class="border py-3 px-4"><?php echo htmlspecialchars($row['nis']); ?></td>
+                                <td class="border py-3 px-4"><?php echo htmlspecialchars($row['nama_lengkap']); ?></td>
+                                <td class="border py-3 px-4"><?php echo "Kelas " . htmlspecialchars($row['tingkat']) . " - " . htmlspecialchars($row['nama_kelas']); ?></td>
+                                <td class="border py-3 px-4"><?php echo htmlspecialchars($row['alamat']); ?></td>
+                                <td class="border py-3 px-4"><?php echo htmlspecialchars($row['tanggal_lahir']); ?></td>
+                                <td class="border py-3 px-4"><?php echo htmlspecialchars($row['no_telp']); ?></td>
+                                <td class="border py-3 px-4"><?php echo htmlspecialchars($row['jenis_kelamin']); ?></td>
+                                <td class="border py-3 px-5 w-50">
                                     <a href="kelolaDataSiswaEdit.php?id_siswa=<?php echo $row['id_siswa']; ?>" 
                                        class="bg-blue-500 text-white rounded-lg shadow-md p-2 hover:bg-blue-700 transition duration-300">
                                         Edit</a>
-                                    <button onclick="confirmDelete('<?php echo $row['id_siswa']; ?>')" class="bg-red-500 text-white rounded-lg shadow-md p-2 hover:bg-red-700 transition duration-300">
+                                    <button onclick="confirmDelete('<?php echo $row['id_siswa']; ?>')" 
+                                            class="bg-red-500 text-white rounded-lg shadow-md p-2 hover:bg-red-700 transition duration-300">
                                         Hapus
                                     </button>
                                 </td>
+
                             </tr>
+                            <?php $no++ ?>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>

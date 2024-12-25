@@ -9,11 +9,14 @@ if (!isset($_SESSION['nama_lengkap'])) {
 
 // Update status berdasarkan tanggal hari ini
 $today = date('Y-m-d');
-$updateQuery = "UPDATE informasi 
-                SET status = CASE 
-                  WHEN tanggal_publikasi = '$today' THEN 'aktif' 
-                  ELSE 'tidak aktif' 
-                END";
+$updateQuery = "
+    UPDATE informasi 
+    SET status = CASE 
+        WHEN tanggal_publikasi = '$today' THEN 'aktif' 
+        WHEN tanggal_publikasi < '$today' AND status = 'aktif' THEN 'aktif' 
+        ELSE 'tidak aktif' 
+    END
+";
 mysqli_query($conn, $updateQuery);
 
 // Fungsi untuk mengambil semua informasi
@@ -44,13 +47,10 @@ if (isset($_GET['delete'])) {
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
-    /* Layout styles */
     .layout-wrapper {
       min-height: 100vh;
       position: relative;
     }
-
-    /* Sidebar styles */
     .sidebar {
       position: fixed;
       left: -250px;
@@ -62,8 +62,6 @@ if (isset($_GET['delete'])) {
       transition: left 0.3s ease;
       box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     }
-
-    /* Sidebar overlay */
     .sidebar-overlay {
       position: fixed;
       top: 0;
@@ -74,40 +72,29 @@ if (isset($_GET['delete'])) {
       z-index: 999;
       display: none;
     }
-
-    /* Sidebar visible state */
     .sidebar-visible .sidebar {
       left: 0;
     }
-
     .sidebar-visible .sidebar-overlay {
       display: block;
     }
-
-    /* Header styles */
     .header {
       position: sticky;
       top: 0;
       z-index: 50;
       width: 100%;
     }
-
-    /* Main content wrapper */
     .main-content {
       width: 100%;
       min-height: 100vh;
     }
-
-    /* Card hover animation */
     .info-card {
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
     .info-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
-
     .status-aktif {
       color: white;
       background-color: #4caf50;
@@ -116,7 +103,6 @@ if (isset($_GET['delete'])) {
       font-weight: bold;
       font-size: 0.875rem;
     }
-
     .status-tidak-aktif {
       color: white;
       background-color: #f44336;
@@ -129,33 +115,22 @@ if (isset($_GET['delete'])) {
 </head>
 <body class="bg-gray-100 text-gray-800">
   <div class="layout-wrapper" id="layoutWrapper">
-    <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
       <?php include '../../layout/sidebar.php'; ?>
     </div>
-
-    <!-- Main Content -->
     <div class="main-content">
-      <!-- Navbar -->
       <header class="header bg-blue-600 text-white py-4 shadow-md">
-        <?php include '../../layout/header.php' ?>
+        <?php include '../../layout/header.php'; ?>
       </header>
-
-      <!-- Content Area -->
       <div class="container mx-auto px-4 py-8">
         <h2 class="text-3xl font-bold text-center mb-6 text-blue-600">Pengelolaan Pengumuman</h2>
-
-        <!-- Informasi Detail -->
         <div class="bg-white shadow-md rounded-lg p-6 mb-6">
           <div class="flex justify-end mb-6">
             <a href="inputInformasi.php" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-all">
               <i class="fas fa-plus"></i> Tambah Pengumuman
             </a>
           </div>
-
           <h3 class="text-xl font-semibold text-gray-800">Semua Pengumuman</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             <?php while ($row = mysqli_fetch_assoc($result)) : ?>
@@ -189,7 +164,6 @@ if (isset($_GET['delete'])) {
       </div>
     </div>
   </div>
-
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const layoutWrapper = document.getElementById('layoutWrapper');
@@ -201,15 +175,12 @@ if (isset($_GET['delete'])) {
         layoutWrapper.classList.toggle('sidebar-visible');
       }
 
-      // Toggle sidebar when button is clicked
       if (toggleButton) {
         toggleButton.addEventListener('click', toggleSidebar);
       }
 
-      // Close sidebar when clicking overlay
       sidebarOverlay.addEventListener('click', toggleSidebar);
 
-      // Close sidebar when pressing Escape key
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && layoutWrapper.classList.contains('sidebar-visible')) {
           toggleSidebar();

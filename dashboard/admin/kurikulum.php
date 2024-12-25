@@ -167,23 +167,36 @@ $resultDropdown = mysqli_query($conn, $queryDropdown);
                                 <button onclick="toggleModal('modal-<?php echo $row['id_kurikulum']; ?>')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300"><i class="fas fa-cogs"></i> Aksi</button>
 
                                 <!-- Modal Pop-up -->
-                                <div id="modal-<?php echo $row['id_kurikulum']; ?>" class="hidden fixed inset-0 z-50 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-                                    <div class="bg-white rounded-lg p-6 w-96 shadow-lg relative">
-                                        <button onclick="toggleModal('modal-<?php echo $row['id_kurikulum']; ?>')" class="absolute top-2 right-2 text-gray-500"><i class="fas fa-times"></i></button>
-                                        <form action="" method="POST" style="display: inline;">
-                                            <input type="hidden" name="active_id" value="<?php echo htmlspecialchars($row['id_kurikulum']); ?>">
-                                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg mb-2 w-full hover:bg-green-700 transition duration-300">Terapkan</button>
-                                        </form>
-                                        <form action="" method="POST" style="display: inline;">
-                                            <input type="hidden" name="deactivate_id" value="<?php echo htmlspecialchars($row['id_kurikulum']); ?>">
-                                            <button type="submit" class="bg-yellow-600 text-white px-4 py-2 rounded-lg mb-2 w-full hover:bg-yellow-700 transition duration-300">Tidak Terapkan</button>
-                                        </form>
-                                        <form action="" method="POST" style="display: inline;">
-                                            <input type="hidden" name="delete_id" value="<?php echo htmlspecialchars($row['id_kurikulum']); ?>">
-                                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg w-full hover:bg-red-700 transition duration-300">Hapus</button>
-                                        </form>
-                                    </div>
-                                </div>
+                                 <!-- Modal Pop-up -->
+                                 <div id="modal-<?php echo $row['id_kurikulum']; ?>" class="hidden fixed inset-0 z-50 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+                                     <div class="bg-white rounded-lg p-6 w-96 shadow-lg relative">
+                                         <button onclick="toggleModal('modal-<?php echo $row['id_kurikulum']; ?>')" class="absolute top-2 right-2 text-gray-500"><i class="fas fa-times"></i></button>
+                                                     
+                                         <!-- Tombol Edit -->
+                                         <a href="editKurikulum.php?id=<?php echo $row['id_kurikulum']; ?>" class="bg-blue-500 text-white px-4 py-2 rounded-lg mb-2 w-full text-center block hover:bg-blue-600 transition duration-300">
+                                             <i class="fas fa-edit"></i> Edit
+                                         </a>
+                                                     
+                                         <!-- Tombol Terapkan -->
+                                         <form action="" method="POST" style="display: inline;">
+                                             <input type="hidden" name="active_id" value="<?php echo htmlspecialchars($row['id_kurikulum']); ?>">
+                                             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg mb-2 w-full hover:bg-green-700 transition duration-300">Terapkan</button>
+                                         </form>
+                                                     
+                                         <!-- Tombol Tidak Terapkan -->
+                                         <form action="" method="POST" style="display: inline;">
+                                             <input type="hidden" name="deactivate_id" value="<?php echo htmlspecialchars($row['id_kurikulum']); ?>">
+                                             <button type="submit" class="bg-yellow-600 text-white px-4 py-2 rounded-lg mb-2 w-full hover:bg-yellow-700 transition duration-300">Tidak Terapkan</button>
+                                         </form>
+                                                     
+                                         <!-- Tombol Hapus -->
+                                         <form action="" method="POST" style="display: inline;">
+                                             <input type="hidden" name="delete_id" value="<?php echo htmlspecialchars($row['id_kurikulum']); ?>">
+                                             <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg w-full hover:bg-red-700 transition duration-300">Hapus</button>
+                                         </form>
+                                     </div>
+                                 </div>
+
                             </td>
                         </tr>
                     <?php endwhile; ?>

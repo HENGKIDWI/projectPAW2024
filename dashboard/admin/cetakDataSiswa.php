@@ -32,10 +32,6 @@ $wali_kelas = $kelas_data['wali_kelas'];
 $query_siswa = "SELECT * FROM siswa WHERE kelas_id = '$filter_kelas'";
 $result_siswa = mysqli_query($conn, $query_siswa);
 
-// Query untuk mendapatkan data jabatan Kepala Sekolah dan Kesiswaan
-$query_jabatan = "SELECT nama_jabatan, nama_personil FROM jabatan WHERE nama_jabatan IN ('Kepala Sekolah', 'Kesiswaan')";
-$result_jabatan = mysqli_query($conn, $query_jabatan);
-
 // Membuat konten HTML untuk PDF
 $html = "<html>
 <head>
@@ -139,23 +135,7 @@ while ($row = mysqli_fetch_assoc($result_siswa)) {
 $html .= "</tbody>
     </table>";
 
-// Add Jabatan Data
-$html .= "<h3>Jabatan</h3>
-    <table class='table'>
-        <thead>
-            <tr>
-                <th>Nama Jabatan</th>
-                <th>Nama Personil</th>
-            </tr>
-        </thead>
-        <tbody>";
 
-while ($jabatan = mysqli_fetch_assoc($result_jabatan)) {
-    $html .= "<tr>
-                <td>{$jabatan['nama_jabatan']}</td>
-                <td>{$jabatan['nama_personil']}</td>
-              </tr>";
-}
 
 $html .= "</tbody>
     </table>

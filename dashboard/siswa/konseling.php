@@ -59,7 +59,7 @@ $resultKonseling = mysqli_query($conn, $queryKonseling);
     <?php include '../../layout/sidebar.php'; ?>
 
     <!-- Navbar -->
-    <header id="header" class="bg-pink-500 text-white py-4 transition-all duration-300">
+    <header id="header" class="bg-blue-500 text-white py-4 transition-all duration-300">
         <?php include '../../layout/header.php' ?>
     </header>
 

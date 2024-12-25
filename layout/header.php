@@ -12,7 +12,7 @@
     <!-- Logo dan Nama Sekolah -->
     <div class="flex items-center space-x-4">
       <button id="sidebarToggle" class="text-3xl bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600" onclick="toggleNav()">&#9776;</button>
-      <a class="flex items-center space-x-2" href="#">
+      <a class="flex items-center space-x-2" href="index.php">
         <img src="https://i.pinimg.com/originals/e2/57/46/e257468b494f341546a8a30c47b023d6.png" alt="Logo" class="w-8 h-8">
         <span class="font-semibold text-lg text-gray-700">SMP Negeri 1 Tambelangan</span>
       </a>

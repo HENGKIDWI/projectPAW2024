@@ -6,7 +6,7 @@ if (!isset($_SESSION['nama_lengkap'])) {
     exit;
 }
 
-include '../../koneksi.php'; // File untuk koneksi database
+include '../../koneksi.php';
 
 $nama = $_SESSION['nama_lengkap'];
 
@@ -17,20 +17,42 @@ $siswa = mysqli_fetch_assoc($result);
 
 // Ambil kelas siswa
 $kelas_id = $siswa['kelas_id'];
+$id_siswa = $siswa['id_siswa'];
 
-// Ambil tugas berdasarkan kelas
-$tugas_query = "
-    SELECT id_tugas, judul, kelas_id, deskripsi, deadline
-    FROM tugas 
-    WHERE kelas_id = '" . mysqli_real_escape_string($conn, $kelas_id) . "'";
-$tugas_result = mysqli_query($conn, $tugas_query);
+// Modifikasi query untuk mengambil file_tugas dan url_tugas
+// $tugas_query = "
+//     SELECT t.id_tugas, t.judul, t.kelas_id, t.deskripsi, t.deadline, t.file_tugas, t.url_tugas
+//     FROM tugas t
+//     LEFT JOIN pengumpulan_tugas pt ON t.id_tugas = pt.id_tugas AND pt.id_siswa = '" . mysqli_real_escape_string($conn, $id_siswa) . "'
+//     WHERE t.kelas_id = '" . mysqli_real_escape_string($conn, $kelas_id) . "'
+//     AND pt.id_tugas IS NULL";
+// $tugas_result = mysqli_query($conn, $tugas_query);
 
-$success_message = "";
+// $success_message = "";
+
+
+// Query untuk tugas yang belum dikumpulkan
+$pending_query = "
+    SELECT t.id_tugas, t.judul, t.kelas_id, t.deskripsi, t.deadline, t.file_tugas, t.url_tugas
+    FROM tugas t
+    LEFT JOIN pengumpulan_tugas pt ON t.id_tugas = pt.id_tugas AND pt.id_siswa = '" . mysqli_real_escape_string($conn, $id_siswa) . "'
+    WHERE t.kelas_id = '" . mysqli_real_escape_string($conn, $kelas_id) . "'
+    AND pt.id_tugas IS NULL";
+$pending_result = mysqli_query($conn, $pending_query);
+
+// Query untuk tugas yang sudah dikumpulkan
+$completed_query = "
+    SELECT t.id_tugas, t.judul, t.kelas_id, t.deskripsi, t.deadline, t.file_tugas, t.url_tugas,
+           pt.tanggal_pengumpulan, pt.status_pengumpulan, pt.nilai, pt.file_tugas
+    FROM tugas t
+    INNER JOIN pengumpulan_tugas pt ON t.id_tugas = pt.id_tugas
+    WHERE t.kelas_id = '" . mysqli_real_escape_string($conn, $kelas_id) . "'
+    AND pt.id_siswa = '" . mysqli_real_escape_string($conn, $id_siswa) . "'";
+$completed_result = mysqli_query($conn, $completed_query);
 
 // Proses pengumpulan tugas
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_tugas = $_POST['id_tugas'];
-    $id_siswa = $siswa['id_siswa'];
     $file_tugas = $_FILES['file_tugas']['name'];
     $tanggal_pengumpulan = date("Y-m-d H:i:s");
 
@@ -56,10 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                              VALUES ('" . mysqli_real_escape_string($conn, $id_tugas) . "', '$id_siswa', '" . mysqli_real_escape_string($conn, $file_tugas) . "', '$tanggal_pengumpulan', '$status_pengumpulan', NULL)";
             if (mysqli_query($conn, $insert_query)) {
                 $success_message = "Tugas berhasil dikumpulkan!";
-
-                // Hapus tugas dari database
-                $delete_query = "DELETE FROM tugas WHERE id_tugas = '" . mysqli_real_escape_string($conn, $id_tugas) . "'";
-                mysqli_query($conn, $delete_query);
+                // Refresh halaman setelah pengumpulan berhasil
+                echo "<script>window.location.href = window.location.href;</script>";
             } else {
                 echo "<script>alert('Gagal menyimpan ke database: " . mysqli_error($conn) . "');</script>";
             }
@@ -99,8 +119,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <!-- Tugas List -->
-        <div class="bg-white shadow-lg rounded-lg p-6">
+        <!-- Tugas yang Belum Dikumpulkan -->
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-8 overflow-x-auto">
+            <h3 class="text-xl font-semibold mb-4 text-gray-700">Tugas yang Belum Dikumpulkan</h3>
             <table class="table-auto w-full border-collapse border border-gray-300">
                 <thead class="bg-blue-500 text-white">
                     <tr>
@@ -108,20 +129,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <th class="border border-gray-300 px-4 py-2">Judul Tugas</th>
                         <th class="border border-gray-300 px-4 py-2">Kelas</th>
                         <th class="border border-gray-300 px-4 py-2">Deskripsi</th>
+                        <th class="border border-gray-300 px-4 py-2">File Soal</th>
+                        <th class="border border-gray-300 px-4 py-2">URL Soal</th>
                         <th class="border border-gray-300 px-4 py-2">Batas Waktu</th>
                         <th class="border border-gray-300 px-4 py-2">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-                    if (mysqli_num_rows($tugas_result) > 0) {
+                    if (mysqli_num_rows($pending_result) > 0) {
                         $no = 1;
-                        while ($tugas = mysqli_fetch_assoc($tugas_result)) {
+                        while ($tugas = mysqli_fetch_assoc($pending_result)) {
                             echo "<tr class='hover:bg-gray-100'>
                                 <td class='border border-gray-300 px-4 py-2 text-center'>{$no}</td>
                                 <td class='border border-gray-300 px-4 py-2'>{$tugas['judul']}</td>
                                 <td class='border border-gray-300 px-4 py-2'>{$tugas['kelas_id']}</td>
                                 <td class='border border-gray-300 px-4 py-2'>{$tugas['deskripsi']}</td>
+                                <td class='border border-gray-300 px-4 py-2 text-center'>" .
+                                (!empty($tugas['file_tugas']) ? 
+                                    "<a href='../guru/uploads/{$tugas['file_tugas']}' target='_blank' class='text-blue-500 hover:text-blue-700'>Lihat Soal</a>" : 
+                                    "-") .
+                                "</td>
+                                <td class='border border-gray-300 px-4 py-2 text-center'>" .
+                                (!empty($tugas['url_tugas']) ? 
+                                    "<a href='{$tugas['url_tugas']}' target='_blank' class='text-blue-500 hover:text-blue-700'>Buka Link</a>" : 
+                                    "-") .
+                                "</td>
                                 <td class='border border-gray-300 px-4 py-2 text-center'>{$tugas['deadline']}</td>
                                 <td class='border border-gray-300 px-4 py-2 text-center'>
                                     <form method='POST' action='' enctype='multipart/form-data'>
@@ -134,9 +167,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $no++;
                         }
                     } else {
-                        echo "<tr>
-                                <td colspan='6' class='text-center text-gray-500'>Tidak ada tugas yang tersedia.</td>
-                              </tr>";
+                        echo "<tr><td colspan='8' class='text-center text-gray-500 py-4'>Tidak ada tugas yang belum dikumpulkan.</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tugas yang Sudah Dikumpulkan -->
+        <div class="bg-white shadow-lg rounded-lg p-6 overflow-x-auto">
+            <h3 class="text-xl font-semibold mb-4 text-gray-700">Tugas yang Sudah Dikumpulkan</h3>
+            <table class="table-auto w-full border-collapse border border-gray-300">
+                <thead class="bg-green-600 text-white">
+                    <tr>
+                        <th class="border border-gray-300 px-4 py-2">No</th>
+                        <th class="border border-gray-300 px-4 py-2">Judul Tugas</th>
+                        <th class="border border-gray-300 px-4 py-2">Kelas</th>
+                        <th class="border border-gray-300 px-4 py-2">Deskripsi</th>
+                        <th class="border border-gray-300 px-4 py-2">File Soal</th>
+                        <th class="border border-gray-300 px-4 py-2">URL Soal</th>
+                        <th class="border border-gray-300 px-4 py-2">File Jawaban</th>
+                        <th class="border border-gray-300 px-4 py-2">Tanggal Pengumpulan</th>
+                        <th class="border border-gray-300 px-4 py-2">Status</th>
+                        <th class="border border-gray-300 px-4 py-2">Nilai</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if (mysqli_num_rows($completed_result) > 0) {
+                        $no = 1;
+                        while ($tugas = mysqli_fetch_assoc($completed_result)) {
+                            $status_class = $tugas['status_pengumpulan'] == 'Tepat Waktu' ? 'text-green-600' : 'text-yellow-600';
+                            echo "<tr class='hover:bg-gray-100'>
+                                <td class='border border-gray-300 px-4 py-2 text-center'>{$no}</td>
+                                <td class='border border-gray-300 px-4 py-2'>{$tugas['judul']}</td>
+                                <td class='border border-gray-300 px-4 py-2'>{$tugas['kelas_id']}</td>
+                                <td class='border border-gray-300 px-4 py-2'>{$tugas['deskripsi']}</td>
+                                <td class='border border-gray-300 px-4 py-2 text-center'>" .
+                                (!empty($tugas['file_tugas']) ? 
+                                    "<a href='../guru/uploads/{$tugas['file_tugas']}' target='_blank' class='text-blue-500 hover:text-blue-700'>Lihat Soal</a>" : 
+                                    "-") .
+                                "</td>
+                                <td class='border border-gray-300 px-4 py-2 text-center'>" .
+                                (!empty($tugas['url_tugas']) ? 
+                                    "<a href='{$tugas['url_tugas']}' target='_blank' class='text-blue-500 hover:text-blue-700'>Buka Link</a>" : 
+                                    "-") .
+                                "</td>
+                                <td class='border border-gray-300 px-4 py-2 text-center'>
+                                    <a href='../guru/uploads/{$tugas['file_tugas']}' target='_blank' class='text-blue-500 hover:text-blue-700'>Download Jawaban</a>
+                                </td>
+                                <td class='border border-gray-300 px-4 py-2 text-center'>{$tugas['tanggal_pengumpulan']}</td>
+                                <td class='border border-gray-300 px-4 py-2 text-center {$status_class}'>{$tugas['status_pengumpulan']}</td>
+                                <td class='border border-gray-300 px-4 py-2 text-center'>" . 
+                                ($tugas['nilai'] !== null ? $tugas['nilai'] : 'Belum dinilai') . 
+                                "</td>
+                            </tr>";
+                            $no++;
+                        }
+                    } else {
+                        echo "<tr><td colspan='10' class='text-center text-gray-500 py-4'>Belum ada tugas yang dikumpulkan.</td></tr>";
                     }
                     ?>
                 </tbody>

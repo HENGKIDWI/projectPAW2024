@@ -269,7 +269,7 @@ $pengumumanAktif = getPengumumanAktif();
             <p class="text-sm mt-2">Masukkan nilai siswa dengan mudah dan cepat.</p>
           </a>
           
-          <a href="detail_absensi.php" class="block bg-green-500 text-white text-center py-8 rounded-lg shadow-lg hover:bg-green-600 transform hover:scale-105 transition-all duration-300 card">
+          <a href="input_absen.php" class="block bg-green-500 text-white text-center py-8 rounded-lg shadow-lg hover:bg-green-600 transform hover:scale-105 transition-all duration-300 card">
             <div class="flex justify-center items-center mb-4">
               <i class="fas fa-check-circle text-4xl"></i>
             </div>

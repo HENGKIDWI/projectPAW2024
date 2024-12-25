@@ -14,7 +14,7 @@ $query = "SELECT e.*, g.nama_lengkap AS nama_pembimbing
           JOIN guru g ON e.pembimbing_id = g.id_guru";
 $result = mysqli_query($conn, $query);
 
-$message = ""; // Untuk pesan notifikasi
+$error_message = "";
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,16 +32,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update ekstra_id untuk siswa dengan username yang valid
         $update_query = "UPDATE siswa SET ekstra_id = $ekstra_id WHERE id_siswa = $id_siswa";
         if (mysqli_query($conn, $update_query)) {
-            $message = "<p class='text-green-500 text-sm'>Berhasil bergabung ke kelas minat bakat!</p>";
+            echo "<script>alert('Pilihan ekstrakurikuler berhasil disimpan.');</script>";
         } else {
-            $message = "<p class='text-red-500 text-sm'>Terjadi kesalahan saat menyimpan data.</p>";
+            $error_message = "Terjadi kesalahan saat menyimpan data.";
         }
     } else {
-        $message = "<p class='text-red-500 text-sm'>Username tidak valid.</p>";
+        $error_message = "Username tidak valid.";
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -120,6 +119,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <input type="text" name="username" id="username" required 
                                        class="mt-1 px-4 py-2 border border-gray-300 rounded-lg w-full">
                             </div>
+                            <?php if (!empty($error_message)): ?>
+                                <p class="text-red-500 text-sm"><?= $error_message; ?></p>
+                            <?php endif; ?>
                             <button type="submit" 
                                     class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                                 Pilih Kegiatan Ini
@@ -129,12 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endwhile; ?>
         </div>
-
-        <!-- Pesan Notifikasi -->
-        <div class="mt-8">
-            <?= $message; ?>
-        </div>
     </div>
+
 </body>
 
 </html>

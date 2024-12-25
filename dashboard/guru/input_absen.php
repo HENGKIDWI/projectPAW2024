@@ -10,6 +10,9 @@ function getDaftarKelasPercabangan($id_kelas)
   return mysqli_query($conn, $query);
 }
 
+// getDaftarmatkulPercabangan
+
+
 // Improved error handling function
 function handleDatabaseError($conn, $query = null)
 {
@@ -289,7 +292,7 @@ $selected_tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d')
       <h3 class="text-xl font-semibold mb-4">Riwayat Absensi</h3>
 
       <!-- filter per kelas -->
-      <form action="" method="POST">
+      <!-- <form action="" method="POST">
         <div class="mb-4">
           <label for="kelas" class="block text-sm font-semibold mb-2">Kelas</label>
           <select id="kelas" name="kelas" class="w-full p-2 border border-gray-300 rounded" required onchange="this.form.submit()">
@@ -303,7 +306,9 @@ $selected_tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d')
             ?>
           </select>
         </div>
-      </form>
+
+
+      </form> -->
 
       <table class="w-full table-auto border-collapse">
         <thead class="bg-blue-600 text-white">
@@ -323,12 +328,12 @@ $selected_tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d')
             while ($row = mysqli_fetch_assoc($riwayat_absensi)) {
 
               // Cek jika ada filter kelas yang dipilih
-              if (!empty($_POST['kelas'])) {
+              if (!empty($_POST['kelas']) && !empty($_POST['mata_pelajaran'])) {
                 $selected_kelas = $_POST['kelas'];
+                $selected_mapel = $_POST['mata_pelajaran'];
 
                 // Ambil data kelas yang dipilih
                 $kelas_result = getDaftarKelasPercabangan($selected_kelas);
-
                 if ($kelas_result && $kelas_data = mysqli_fetch_assoc($kelas_result)) {
                   // Format nama kelas untuk perbandingan
                   $selected_kelas_name = trim($kelas_data['tingkat'] . ' ' . $kelas_data['nama_kelas']);
@@ -336,16 +341,18 @@ $selected_tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d')
 
                   // Tampilkan hanya jika kelas sesuai
                   if ($current_kelas_name === $selected_kelas_name) {
-                    echo "<tr>";
-                    echo "<td class='py-2 px-4 border text-center'>" . $no++ . "</td>";
-                    echo "<td class='py-2 px-4 border'>" . $row['nama_pelajaran'] . "</td>";
-                    echo "<td class='py-2 px-4 border text-center'>" . $row['tingkat'] . " " . $row['nama_kelas'] . "</td>";
-                    echo "<td class='py-2 px-4 border text-center'>" . $row['tanggal'] . "</td>";
-                    echo "<td class='py-2 px-4 border text-center'>";
-                    echo "<a href='detail_absensi.php?kelas=" . $row['tingkat'] . "&mapel=" . urlencode($row['nama_pelajaran']) . "&tanggal=" . $row['tanggal'] . "' 
+                    if ($selected_mapel == $row['nama_pelajaran']) {
+                      echo "<tr>";
+                      echo "<td class='py-2 px-4 border text-center'>" . $no++ . "</td>";
+                      echo "<td class='py-2 px-4 border'>" . $row['nama_pelajaran'] . "</td>";
+                      echo "<td class='py-2 px-4 border text-center'>" . $row['tingkat'] . " " . $row['nama_kelas'] . "</td>";
+                      echo "<td class='py-2 px-4 border text-center'>" . $row['tanggal'] . "</td>";
+                      echo "<td class='py-2 px-4 border text-center'>";
+                      echo "<a href='detail_absensi.php?kelas=" . $row['tingkat'] . "&mapel=" . urlencode($row['nama_pelajaran']) . "&tanggal=" . $row['tanggal'] . "' 
                                      class='bg-blue-500 text-white py-1 px-3 rounded-md text-sm hover:bg-blue-400'>Detail</a>";
-                    echo "</td>";
-                    echo "</tr>";
+                      echo "</td>";
+                      echo "</tr>";
+                    }
                   }
                 }
               } else {

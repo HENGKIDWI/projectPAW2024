@@ -11,7 +11,7 @@
                 echo '<a href="../../dashboard/admin/kelolaDataSiswa.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-users mr-2"></i>Kelas Dan Siswa</a>';
                 echo '<a href="../../dashboard/admin/tampilanGuru.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-chalkboard-teacher mr-2"></i>Kelola Data Guru</a>';
                 echo '<a href="../../dashboard/admin/viewInformasiDetail.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-bullhorn mr-2"></i>Informasi/Pengumuman</a>';
-                echo '<a href="../../dashboard/admin/kurikulum.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-book mr-2"></i>Input Kurikulum</a>';
+                echo '<a href="../../dashboard/admin/kurikulum.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-book mr-2"></i> Kurikulum</a>';
                 echo '<a href="../../dashboard/admin/profilesekolah.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-school mr-2"></i>Profil Sekolah</a>';
                 echo '<a href="../../dashboard/admin/Struktural_sekolah.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-building mr-2"></i>Struktural Sekolah</a>';
                 echo '<a href="../../dashboard/admin/kelolaLoginPengguna.php" class="block py-2.5 px-4 hover:bg-gray-700"><i class="fas fa-user-lock mr-2"></i>Kelola Akun Pengguna</a>';

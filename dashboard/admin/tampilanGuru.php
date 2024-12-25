@@ -122,35 +122,35 @@ $count = 1;
             </form>
 
             <div class="flex gap-4 mb-6">
-                <a href="cetakDataGuru.php" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-700">Cetak Data Guru</a>
+                <a href="cetakDataGuru.php" target="_blank" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-700">Cetak Data Guru</a>
                 <a href="createGuru.php" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Tambah Guru</a>
                 <a href="showClass.php" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">Tampilkan Kelas</a>
             </div>
 
             <form method="POST">
-                <table class="table-auto w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden">
+                <table class="table-auto w-full border-collapse w-full bg-white shadow-md rounded-lg overflow-hidden">
                     <thead class="bg-blue-600 text-white">
                         <tr>
-                            <th class="px-4 py-3">No</th>
-                            <th class="px-4 py-3">NIP</th>
-                            <th class="px-4 py-3">Nama Lengkap</th>
-                            <th class="px-4 py-3">Email</th>
-                            <th class="px-4 py-3">No. Telp</th>
-                            <th class="px-4 py-3">Mata Pelajaran</th>
-                            <th class="px-4 py-3">Wali Kelas</th>
-                            <th class="px-4 py-3">Aksi</th>
+                            <th class="border px-4 py-3">No</th>
+                            <th class="border px-4 py-3">NIP</th>
+                            <th class="border px-4 py-3">Nama Lengkap</th>
+                            <th class="border px-4 py-3">Email</th>
+                            <th class="border px-4 py-3">No. Telp</th>
+                            <th class="border px-4 py-3">Mata Pelajaran</th>
+                            <th class="border px-4 py-3">Wali Kelas</th>
+                            <th class="border px-4 py-3">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php while ($row = mysqli_fetch_assoc($result)) : ?>
                             <tr class="border-b hover:bg-gray-100">
-                                <td class="px-4 py-2"><?= $count++ ?></td>
-                                <td class="px-4 py-2"><?= htmlspecialchars($row['nip']) ?></td>
-                                <td class="px-4 py-2"><?= htmlspecialchars($row['nama_lengkap']) ?></td>
-                                <td class="px-4 py-2"><?= htmlspecialchars($row['email']) ?></td>
-                                <td class="px-4 py-2"><?= htmlspecialchars($row['no_telp']) ?></td>
-                                <td class="px-4 py-2"><?= htmlspecialchars($row['nama_pelajaran']) ?></td>
-                                <td class="px-4 py-2">
+                                <td class="border px-4 py-2"><?= $count++ ?></td>
+                                <td class="border px-4 py-2"><?= htmlspecialchars($row['nip']) ?></td>
+                                <td class="border px-4 py-2"><?= htmlspecialchars($row['nama_lengkap']) ?></td>
+                                <td class="border px-4 py-2"><?= htmlspecialchars($row['email']) ?></td>
+                                <td class="border px-4 py-2"><?= htmlspecialchars($row['no_telp']) ?></td>
+                                <td class="border px-4 py-2"><?= htmlspecialchars($row['nama_pelajaran']) ?></td>
+                                <td class="border px-4 py-2">
                                     <select name="kelas[<?= $row['id_guru'] ?>]" class="border rounded px-2 py-1">
                                         <option value="">Bukan Wali Kelas</option>
                                         <?php
@@ -172,11 +172,13 @@ $count = 1;
                                             </option>
                                         <?php endwhile; ?>
                                     </select>
+                                    <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Simpan</button>
                                 </td>
                                 <td class="px-4 py-2">
-                                    <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Simpan</button>
+                                    <a href="editGuru.php?id=<?= $row['id_guru'] ?>" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Edit Data</a>
                                     <a href="javascript:void(0)" onclick="confirmDelete('deleteGuru.php?id=<?= $row['id_guru'] ?>')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Hapus</a>
                                 </td>
+
                             </tr>
                         <?php endwhile; ?>
                     </tbody>

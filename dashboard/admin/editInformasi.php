@@ -3,15 +3,15 @@ include "../../koneksi.php";
 session_start();
 
 if (!isset($_SESSION['nama_lengkap'])) {
-    header("Location: ../../login.php");
-    exit;
+  header("Location: ../../login.php");
+  exit;
 }
 
 // Ambil data pengumuman berdasarkan ID
 $id = $_GET['id'] ?? '';
 if (!$id) {
-    header("Location: viewInformasiDetail.php");
-    exit;
+  header("Location: viewInformasiDetail.php");
+  exit;
 }
 
 $query = "SELECT * FROM informasi WHERE id_informasi = ?";
@@ -22,27 +22,38 @@ $result = mysqli_stmt_get_result($stmt);
 $data = mysqli_fetch_assoc($result);
 
 if (!$data) {
-    header("Location: viewInformasiDetail.php");
-    exit;
+  header("Location: viewInformasiDetail.php");
+  exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $judul = $_POST['judul_informasi'] ?? '';
-    $deskripsi = $_POST['deskripsi'] ?? '';
-    $tanggal_publikasi = $_POST['tanggal_publikasi'] ?? '';
+  $judul = $_POST['judul_informasi'] ?? '';
+  $deskripsi = $_POST['deskripsi'] ?? '';
+  $tanggal_publikasi = $_POST['tanggal_publikasi'] ?? '';
 
-    $update_query = "UPDATE informasi SET judul_informasi = ?, deskripsi = ?, tanggal_publikasi = ? WHERE id_informasi = ?";
-    $update_stmt = mysqli_prepare($conn, $update_query);
-    mysqli_stmt_bind_param($update_stmt, 'sssi', $judul, $deskripsi, $tanggal_publikasi, $id);
-    mysqli_stmt_execute($update_stmt);
-
-    header("Location: viewInformasiDetail.php");
+  // Validasi tanggal
+  $tanggal_sekarang = date('Y-m-d');
+  if ($tanggal_publikasi < $tanggal_sekarang) {
+    $_SESSION['status'] = "Tanggal publikasi tidak boleh kurang dari hari ini!";
+    $_SESSION['status_code'] = "error";
+    header("Location: editInformasi.php?id=$id");
     exit;
+  }
+
+  $update_query = "UPDATE informasi SET judul_informasi = ?, deskripsi = ?, tanggal_publikasi = ? WHERE id_informasi = ?";
+  $update_stmt = mysqli_prepare($conn, $update_query);
+  mysqli_stmt_bind_param($update_stmt, 'sssi', $judul, $deskripsi, $tanggal_publikasi, $id);
+  mysqli_stmt_execute($update_stmt);
+
+  header("Location: viewInformasiDetail.php");
+  exit;
 }
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 text-gray-800">
   <div class="layout-wrapper">
     <!-- Sidebar -->
@@ -82,8 +94,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="mb-4">
               <label for="tanggal_publikasi" class="block text-sm font-medium text-gray-700">Tanggal Publikasi</label>
-              <input type="date" id="tanggal_publikasi" name="tanggal_publikasi" value="<?php echo htmlspecialchars($data['tanggal_publikasi']); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+              <input
+                type="date"
+                id="tanggal_publikasi"
+                name="tanggal_publikasi"
+                value="<?php echo htmlspecialchars($data['tanggal_publikasi']); ?>"
+                min="<?php echo date('Y-m-d'); ?>"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
+
 
             <div class="flex justify-end">
               <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all">
@@ -96,4 +115,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 </body>
+
 </html>
